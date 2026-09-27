@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ramin Sheikhi Garjan | Structural &amp; Earthquake Engineering</title>
+<meta name="description" content="Ramin Sheikhi Garjan, Ph.D. candidate in Structural Engineering at Özyeğin University, Istanbul. Research on multi-hazard performance of precast industrial buildings: fire following earthquake, seismic fragility and post-earthquake assessment.">
+<meta name="author" content="Ramin Sheikhi Garjan">
+<meta property="og:title" content="Ramin Sheikhi Garjan | Structural &amp; Earthquake Engineering">
+<meta property="og:description" content="Multi-hazard performance assessment of industrial buildings: fire following earthquake, seismic fragility, post-earthquake reconnaissance.">
+<meta property="og:type" content="profile">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏗️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
+
+<!--
+  ============================================================
+  EDIT YOUR LINKS HERE
+  ------------------------------------------------------------
+  1. Google Scholar: replace the href of every element with
+     class="js-scholar" (search "js-scholar") with your profile URL,
+     e.g. https://scholar.google.com/citations?user=XXXXXXXXXXXX
+     It currently points to a Scholar author search as a fallback.
+  2. CV: put Ramin_Sheikhi_Resume.pdf in the same folder as this file.
+  3. Optional profiles (ORCID, ResearchGate, LinkedIn): uncomment
+     the lines marked OPTIONAL in the sidebar and add your URLs.
+  ============================================================
+-->
+
+<style>
+:root{
+  --bg:#F3F5F6;
+  --surface:#FFFFFF;
+  --ink:#16202B;
+  --steel:#56636F;
+  --rule:#D6DCE1;
+  --accent:#1D5FA8;
+  --accent-soft:#E4EDF7;
+  --ember:#C4471D;
+  --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:"IBM Plex Sans", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11171D; --surface:#182129; --ink:#E6EBEF; --steel:#9AA7B2;
+    --rule:#2B3640; --accent:#6FA8E6; --accent-soft:#1C2E42; --ember:#E8774F;
+  }
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-behavior:smooth;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 24px)}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--sans);font-size:1rem;line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:3px}
+a:hover{text-decoration-thickness:2px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+img{max-width:100%}
+
+/* ---------- Layout ---------- */
+.shell{
+  display:grid;grid-template-columns:300px minmax(0,1fr);
+  max-width:1180px;margin:0 auto;min-height:100vh;
+}
+.sidebar{
+  position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;
+  padding:48px 32px 32px;border-right:1px solid var(--rule);
+}
+main{padding:48px 56px 64px;max-width:820px}
+
+/* ---------- Sidebar ---------- */
+.name{
+  font-family:var(--serif);font-weight:700;font-size:2rem;line-height:1.1;
+  margin:0 0 12px;letter-spacing:-0.01em;
+}
+.role{margin:0;color:var(--steel);font-size:.95rem;line-height:1.5}
+.role a{color:inherit}
+.links{list-style:none;padding:0;margin:28px 0 0;display:grid;gap:10px;font-size:.92rem}
+.links a{display:flex;gap:10px;align-items:center;color:var(--ink);text-decoration:none}
+.links a:hover span{text-decoration:underline;text-underline-offset:3px}
+.links svg{width:18px;height:18px;flex:none;color:var(--steel)}
+.cv-btn{
+  display:inline-block;margin-top:24px;padding:9px 16px;border:1.5px solid var(--ink);
+  color:var(--ink);text-decoration:none;font-weight:500;font-size:.92rem;border-radius:3px;
+}
+.cv-btn:hover{background:var(--ink);color:var(--bg)}
+.toc{margin-top:36px;border-top:1px solid var(--rule);padding-top:20px}
+.toc ul{list-style:none;padding:0;margin:0;display:grid;gap:2px}
+.toc a{
+  display:block;padding:5px 0 5px 12px;border-left:2px solid transparent;
+  color:var(--steel);text-decoration:none;font-size:.92rem;
+}
+.toc a:hover{color:var(--ink)}
+.toc a.active{color:var(--ink);border-left-color:var(--accent);font-weight:500}
+
+/* ---------- Opening ---------- */
+.trace{display:block;width:100%;height:96px;margin:0 0 28px;overflow:visible}
+.trace path{fill:none;stroke:var(--ink);stroke-width:1.2;stroke-linejoin:round}
+.trace .base{stroke:var(--rule);stroke-width:1}
+.trace .mark{stroke:var(--ember);stroke-width:1;stroke-dasharray:3 3}
+.trace text{font-family:var(--sans);font-size:11px;fill:var(--steel)}
+.lede{
+  font-family:var(--serif);font-size:1.5rem;line-height:1.4;font-weight:500;
+  margin:0 0 20px;max-width:34ch;
+}
+.intro p{max-width:68ch}
+
+/* ---------- Sections ---------- */
+section{padding-top:56px}
+h2{
+  font-family:var(--serif);font-size:1.55rem;font-weight:600;margin:0 0 20px;
+  padding-bottom:10px;border-bottom:1px solid var(--rule);
+}
+h3{font-size:1rem;font-weight:600;margin:28px 0 12px;color:var(--steel)}
+p{margin:0 0 14px}
+
+/* research themes */
+.themes{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:24px 32px}
+.theme h4{font-family:var(--serif);font-size:1.08rem;font-weight:600;margin:0 0 6px}
+.theme p{font-size:.95rem;color:var(--steel);margin:0}
+
+/* projects */
+.project{
+  background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--accent);
+  padding:20px 22px;margin-bottom:16px;border-radius:2px;
+}
+.project h4{font-family:var(--serif);font-size:1.12rem;font-weight:600;margin:0 0 4px;line-height:1.35}
+.project .meta{font-size:.88rem;color:var(--steel);margin-bottom:10px}
+.project p{font-size:.95rem;margin:0}
+
+/* timeline entries */
+.entry{display:grid;grid-template-columns:128px minmax(0,1fr);gap:4px 24px;padding:16px 0;border-top:1px solid var(--rule)}
+.entry:first-of-type{border-top:0;padding-top:0}
+.when{font-size:.88rem;color:var(--steel);font-variant-numeric:tabular-nums;padding-top:2px}
+.what h4{margin:0;font-size:1.02rem;font-weight:600;line-height:1.4}
+.what .where{color:var(--steel);font-size:.93rem;margin:2px 0 8px}
+.what ul{margin:6px 0 0;padding-left:18px}
+.what li{margin-bottom:5px;font-size:.95rem}
+.what .note{font-size:.93rem;margin:4px 0 0}
+
+/* publications */
+.pubs{list-style:none;padding:0;margin:0;counter-reset:pub}
+.pubs li{padding:14px 0 14px 0;border-top:1px solid var(--rule);font-size:.95rem}
+.pubs li:first-child{border-top:0;padding-top:4px}
+.pub-title{font-weight:600;display:block;margin-bottom:2px;line-height:1.45}
+.pub-authors{display:block;color:var(--steel)}
+.pub-authors b{color:var(--ink);font-weight:600}
+.pub-venue{display:block;font-style:italic}
+.pub-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.tag{
+  display:inline-block;font-size:.8rem;padding:2px 9px;border:1px solid var(--rule);
+  border-radius:3px;color:var(--steel);text-decoration:none;background:var(--surface);
+}
+a.tag:hover{border-color:var(--accent);color:var(--accent)}
+.status{color:var(--ember);border-color:currentColor;background:transparent}
+
+/* skills */
+.skills{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px 32px}
+.skills h4{font-size:.95rem;font-weight:600;margin:0 0 6px}
+.skills p{font-size:.95rem;color:var(--steel);margin:0}
+.lang{display:grid;grid-template-columns:auto 1fr;gap:4px 20px;font-size:.95rem;margin:0}
+.lang dt{font-weight:500}
+.lang dd{margin:0;color:var(--steel)}
+
+/* awards */
+.awards{padding-left:18px;margin:0}
+.awards li{margin-bottom:8px}
+
+/* references */
+.refs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.ref{font-size:.93rem;line-height:1.55}
+.ref strong{display:block;font-family:var(--serif);font-size:1.02rem}
+.ref span{display:block;color:var(--steel)}
+
+footer{
+  margin-top:72px;padding-top:20px;border-top:1px solid var(--rule);
+  font-size:.85rem;color:var(--steel);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px){
+  .shell{display:block}
+  .sidebar{
+    position:static;height:auto;border-right:0;border-bottom:1px solid var(--rule);
+    padding:36px 24px 0;
+  }
+  .toc{
+    position:sticky;top:0;margin:28px -24px 0;padding:0;background:var(--bg);
+    border-top:1px solid var(--rule);z-index:5;padding-top:env(safe-area-inset-top,0px);
+  }
+  .sidebar{overflow:visible}
+  .toc ul{display:flex;overflow-x:auto;gap:0;padding:0 16px;scrollbar-width:none}
+  .toc ul::-webkit-scrollbar{display:none}
+  .toc a{white-space:nowrap;border-left:0;border-bottom:2px solid transparent;padding:12px 10px}
+  .toc a.active{border-bottom-color:var(--accent)}
+  main{padding:32px 24px 48px}
+  .lede{font-size:1.3rem}
+  html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 60px)}
+}
+@media (max-width: 560px){
+  .entry{grid-template-columns:1fr}
+  .when{padding-top:0}
+}
+@media print{
+  .sidebar{position:static;height:auto;border:0}
+  .toc,.trace,.cv-btn{display:none}
+  .shell{display:block}
+  main{padding:0}
+  a{color:inherit}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <h1 class="name">Ramin Sheikhi Garjan</h1>
+    <p class="role">Ph.D. Candidate, Structural Engineering<br>
+      Department of Civil Engineering<br>
+      <a href="https://www.ozyegin.edu.tr/en" target="_blank" rel="noopener">Özyeğin University</a>, Istanbul, Türkiye</p>
+
+    <ul class="links">
+      <li><a href="mailto:ramin.sheikhi@ozu.edu.tr">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="m3.5 6 8.5 7 8.5-7"/></svg>
+        <span>ramin.sheikhi@ozu.edu.tr</span></a></li>
+      <li><a href="tel:+905527785695">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>
+        <span>+90 552 778 5695</span></a></li>
+      <li><a class="js-scholar" href="https://scholar.google.com/citations?view_op=search_authors&amp;mauthors=Ramin+Sheikhi+Garjan" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 1 9l11 6 9-4.9V17h2V9L12 3Zm-6 9.2V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-3.8l-6 3.3-6-3.3Z"/></svg>
+        <span>Google Scholar</span></a></li>
+      <li><a href="https://structurae.info/fr/litterature/auteurs/sheikhi-garjan-ramin-1727807" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 20V9l8-5 8 5v11M4 20h16M9 20v-6h6v6"/></svg>
+        <span>Structurae profile</span></a></li>
+      <li><a href="http://hdl.handle.net/10679/8819" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 4h10l4 4v12H5z"/><path d="M15 4v4h4M8 12h8M8 16h8"/></svg>
+        <span>ÖzÜ research repository</span></a></li>
+      <!-- OPTIONAL: <li><a href="https://orcid.org/0000-0000-0000-0000" target="_blank" rel="noopener"><span>ORCID</span></a></li> -->
+      <!-- OPTIONAL: <li><a href="https://www.researchgate.net/profile/YOUR-PROFILE" target="_blank" rel="noopener"><span>ResearchGate</span></a></li> -->
+      <!-- OPTIONAL: <li><a href="https://www.linkedin.com/in/YOUR-PROFILE" target="_blank" rel="noopener"><span>LinkedIn</span></a></li> -->
+    </ul>
+
+    <a class="cv-btn" href="Ramin_Sheikhi_Resume.pdf" download>Download CV (PDF)</a>
+
+    <nav class="toc" aria-label="Sections">
+      <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#research">Research</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#publications">Publications</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#education">Education</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#awards">Awards</a></li>
+        <li><a href="#references">References</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <main>
+
+    <section id="about" class="intro" style="padding-top:0">
+      <svg class="trace" id="trace" viewBox="0 0 1000 96" preserveAspectRatio="none" aria-hidden="true">
+        <path class="base" d="M0 48H1000"/>
+        <path class="mark" id="markP" d=""/>
+        <path class="mark" id="markS" d=""/>
+        <path id="wave" d=""/>
+      </svg>
+
+      <p class="lede">I study how industrial buildings behave when one hazard follows another: an earthquake, then fire.</p>
+      <p>I am a Ph.D. candidate in Structural Engineering at Özyeğin University in Istanbul, advised by Asst. Prof. Derya Deniz. My thesis develops a multi-hazard performance framework for buildings exposed to fires and debris flows after earthquakes, with a focus on precast reinforced concrete industrial facilities, the backbone of Türkiye's manufacturing stock.</p>
+      <p>My work combines nonlinear numerical modelling in OpenSees and OpenSeesPy, incremental dynamic analysis, seismic and fire fragility analysis, and Bayesian updating of analytical fragility models with empirical damage data from the 2023 Kahramanmaraş earthquake sequence, where I took part in field reconnaissance of more than a hundred industrial facilities.</p>
+      <p>Before my doctorate I spent six years as a practising structural engineer designing and supervising reinforced concrete and steel buildings in Iran, which keeps my research grounded in how structures are actually designed and built.</p>
+    </section>
+
+    <section id="research">
+      <h2>Research</h2>
+      <div class="themes">
+        <div class="theme">
+          <h4>Fire following earthquake</h4>
+          <p>Sequential earthquake–fire analysis of precast RC industrial buildings: how seismic damage changes thermal response, fire resistance and collapse risk.</p>
+        </div>
+        <div class="theme">
+          <h4>Seismic fragility and Bayesian updating</h4>
+          <p>Analytical fragility curves from incremental dynamic analysis, updated with observed damage from the 2023 Kahramanmaraş earthquakes to reduce model uncertainty.</p>
+        </div>
+        <div class="theme">
+          <h4>Multi-hazard risk and resilience</h4>
+          <p>Loss, impact and recovery models for industrial facilities, and frameworks for building stocks subjected to earthquakes, floods and debris flows.</p>
+        </div>
+        <div class="theme">
+          <h4>Post-earthquake assessment</h4>
+          <p>Field reconnaissance protocols, damage and functionality data for industrial facilities, and structural health monitoring for damage assessment.</p>
+        </div>
+        <div class="theme">
+          <h4>Ground motion and uncertainty</h4>
+          <p>Ground motion selection and prediction, record-to-record variability and uncertainty quantification with Monte Carlo simulation.</p>
+        </div>
+        <div class="theme">
+          <h4>Performance-based design</h4>
+          <p>Performance-based seismic design of industrial buildings and innovative bracing systems, including eccentric split-X braced frames.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects">
+      <h2>Research projects</h2>
+      <div class="project">
+        <h4>Fire Following Earthquake in Industrial Buildings</h4>
+        <div class="meta"><a href="https://www.tubitak.gov.tr/en" target="_blank" rel="noopener">TÜBİTAK</a> 3501 Career Development Program · Özyeğin University</div>
+        <p>Numerical models and fragility-based risk assessment for precast industrial buildings subjected to sequential earthquake and fire scenarios, using OpenSees/OpenSeesPy thermo-mechanical analysis and Monte Carlo simulation.</p>
+      </div>
+      <div class="project">
+        <h4>GURU: GIS-Based Platform for Urban Seismic Resilience</h4>
+        <div class="meta"><a href="https://www.tubitak.gov.tr/en" target="_blank" rel="noopener">TÜBİTAK</a> 1719 · <a href="https://www.eurekanetwork.org" target="_blank" rel="noopener">Eureka Network</a> 2024 National Call on Post-Earthquake Resilience</div>
+        <p>An international collaboration developing a GIS-based platform to support seismic resilience assessment and post-earthquake decision making in urban areas.</p>
+      </div>
+    </section>
+
+    <section id="publications">
+      <h2>Publications</h2>
+
+      <h3>Journal articles</h3>
+      <ol class="pubs">
+        <li>
+          <span class="pub-title">Field reconnaissance on seismic performance and functionality of Turkish industrial facilities affected by the 2023 Kahramanmaraş earthquake sequence</span>
+          <span class="pub-authors">G. Sağbaş, <b>R. Sheikhi Garjan</b>, M. K. Sarıkaya, D. Deniz</span>
+          <span class="pub-venue"><a href="https://link.springer.com/journal/10518" target="_blank" rel="noopener">Bulletin of Earthquake Engineering</a>, 22(1), 227–254, 2024</span>
+          <span class="pub-links">
+            <a class="tag" href="https://doi.org/10.1007/s10518-023-01741-8" target="_blank" rel="noopener">DOI</a>
+            <a class="tag" href="https://link.springer.com/article/10.1007/s10518-023-01741-8" target="_blank" rel="noopener">Springer</a>
+            <a class="tag" href="http://hdl.handle.net/10679/8819" target="_blank" rel="noopener">Repository</a>
+          </span>
+        </li>
+        <li>
+          <span class="pub-title">Seismic behaviour assessment of eccentrically split-X braced frames</span>
+          <span class="pub-authors"><b>R. Sheikhi</b>, N. Fanaie</span>
+          <span class="pub-venue"><a href="https://scientiairanica.sharif.edu" target="_blank" rel="noopener">Scientia Iranica</a>, 28(1), 65–84, 2021</span>
+          <span class="pub-links">
+            <a class="tag" href="https://doi.org/10.24200/sci.2019.5054.1073" target="_blank" rel="noopener">DOI</a>
+          </span>
+        </li>
+      </ol>
+
+      <h3>In preparation</h3>
+      <ol class="pubs">
+        <li>
+          <span class="pub-title">Risk assessment of fire following earthquake in industrial precast buildings</span>
+          <span class="pub-authors"><b>R. Sheikhi</b>, D. Deniz</span>
+          <span class="pub-links"><span class="tag status">In preparation</span></span>
+        </li>
+      </ol>
+
+      <h3>Conference papers</h3>
+      <ol class="pubs">
+        <li>
+          <span class="pub-title">Impact models for industrial facilities affected by the 2023 Kahramanmaraş, Türkiye earthquakes</span>
+          <span class="pub-authors"><b>R. Sheikhi</b>, G. Sağbaş, M. K. Sarıkaya</span>
+          <span class="pub-venue"><a href="https://www.wcee2024.it" target="_blank" rel="noopener">18th World Conference on Earthquake Engineering (18WCEE)</a>, Milan, 2024</span>
+        </li>
+        <li>
+          <span class="pub-title">Structural and nonstructural loss assessment models for industrial facilities affected by the 2023 Kahramanmaraş earthquakes</span>
+          <span class="pub-authors">M. K. Sarıkaya, G. Sağbaş, N. S. Ayhan, <b>R. Sheikhi</b></span>
+          <span class="pub-venue">6th International Disaster and Resilience Congress (IDRC), Ankara, December 16–20, 2024</span>
+        </li>
+        <li>
+          <span class="pub-title">Recovery models for industrial buildings after the 2023 Türkiye earthquakes</span>
+          <span class="pub-authors">N. S. Ayhan, G. Sağbaş, <b>R. Sheikhi</b>, M. K. Sarıkaya</span>
+          <span class="pub-venue">8th Asian-Pacific Symposium on Structural Reliability and Its Applications (APSSRA), 2024</span>
+        </li>
+        <li>
+          <span class="pub-title">Field observations for industrial buildings after 2023 Kahramanmaraş earthquakes</span>
+          <span class="pub-authors">G. Sağbaş, <b>R. Sheikhi</b></span>
+          <span class="pub-venue">Proceedings of the 7th International Conference on Earthquake Engineering, 2024</span>
+        </li>
+        <li>
+          <span class="pub-title">A multi-hazard resilience framework for residential building stocks subjected to floods and debris flows</span>
+          <span class="pub-authors">D. Deniz, A. B. Ceyhan, Y. Moaiyedfar, <b>R. Sheikhi</b></span>
+          <span class="pub-venue"><a href="https://www.egu23.eu" target="_blank" rel="noopener">EGU General Assembly 2023</a>, Conference Abstracts, EGU23-8868</span>
+        </li>
+      </ol>
+    </section>
+
+    <section id="experience">
+      <h2>Experience</h2>
+
+      <div class="entry">
+        <div class="when">2021 – present</div>
+        <div class="what">
+          <h4>Ph.D. Researcher</h4>
+          <div class="where"><a href="https://www.ozyegin.edu.tr/en" target="_blank" rel="noopener">Özyeğin University</a>, Istanbul, Türkiye</div>
+          <ul>
+            <li>Researcher on the TÜBİTAK 3501 project “Fire Following Earthquake in Industrial Buildings” and the TÜBİTAK 1719 / Eureka Network project “GURU: GIS-Based Platform for Urban Seismic Resilience”.</li>
+            <li>Developed OpenSees and OpenSeesPy models for multi-hazard evaluation of structures under sequential earthquake–fire scenarios.</li>
+            <li>Ran parametric studies and Monte Carlo simulations on fire propagation and debris-flow impacts on structural performance.</li>
+            <li>Took part in field reconnaissance of industrial facilities after the 2023 Kahramanmaraş earthquake sequence and analysed the collected damage and functionality data.</li>
+            <li>Collaborated with international research teams on post-earthquake assessment of industrial facilities.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="when">2015 – 2021</div>
+        <div class="what">
+          <h4>Structural Engineer</h4>
+          <div class="where">Moshaverin 7 Cheshme Consulting Engineers, Ardabil, Iran</div>
+          <ul>
+            <li>Designed and supervised reinforced concrete and steel building projects: residential, commercial and public infrastructure.</li>
+            <li>Prepared engineering drawings, technical specifications and structural analysis reports.</li>
+            <li>Coordinated with contractors and clients through to project delivery.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="when">2013 – 2015</div>
+        <div class="what">
+          <h4>Graduate Research Assistant</h4>
+          <div class="where"><a href="https://www.kntu.ac.ir" target="_blank" rel="noopener">K. N. Toosi University of Technology</a>, Tehran, Iran</div>
+          <ul>
+            <li>Incremental dynamic analysis and nonlinear time-history analysis of eccentrically braced frames with shape memory alloy (SMA) dampers.</li>
+            <li>Seismic performance of irregular steel frames and steel plate shear wall systems.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="when">2013 – 2015</div>
+        <div class="what">
+          <h4>Teaching Assistant</h4>
+          <div class="where"><a href="https://www.uma.ac.ir" target="_blank" rel="noopener">University of Mohaghegh Ardabili</a> and Islamic Azad University, Ardabil, Iran</div>
+          <ul>
+            <li>Structural Analysis I &amp; II, Steel Structures II, with Dr. Amin Ghanadasl, Dr. Ali Mansoori and Dr. Kazem Shakeri.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="when">2008 – 2013</div>
+        <div class="what">
+          <h4>Physics and Mathematics Teacher, Educational Consultant</h4>
+          <div class="where">Kanun-e-Farhangi Amuzesh (Ghalamchi), Ardabil, Iran</div>
+          <ul>
+            <li>Taught advanced physics and mathematics to high-school students and developed curriculum materials.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="education">
+      <h2>Education</h2>
+
+      <div class="entry">
+        <div class="when">2021 – present</div>
+        <div class="what">
+          <h4>Ph.D., Structural Engineering</h4>
+          <div class="where"><a href="https://www.ozyegin.edu.tr/en" target="_blank" rel="noopener">Özyeğin University</a>, Istanbul, Türkiye · GPA 3.91 / 4.00 · Full scholarship</div>
+          <p class="note"><strong>Thesis:</strong> Multi-hazard performance of structural buildings considering fires and debris flows after earthquakes</p>
+          <p class="note"><strong>Advisor:</strong> Asst. Prof. Derya Deniz</p>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="when">2013 – 2015</div>
+        <div class="what">
+          <h4>M.Sc., Structural Engineering</h4>
+          <div class="where"><a href="https://www.kntu.ac.ir" target="_blank" rel="noopener">K. N. Toosi University of Technology</a>, Tehran, Iran · GPA 15.7 / 20 · Full scholarship</div>
+          <p class="note"><strong>Thesis:</strong> Investigation on seismic behavior of eccentric split-X bracing using incremental dynamic analysis</p>
+          <p class="note"><strong>Advisor:</strong> Prof. Nader Fanaie</p>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="when">2008 – 2013</div>
+        <div class="what">
+          <h4>B.Sc., Civil Engineering</h4>
+          <div class="where"><a href="https://www.uma.ac.ir" target="_blank" rel="noopener">University of Mohaghegh Ardabili</a>, Ardabil, Iran · GPA 16.3 / 20</div>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="when">2004 – 2008</div>
+        <div class="what">
+          <h4>Diploma, Mathematics and Physics</h4>
+          <div class="where">NODET (National Organization for Development of Exceptional Talents), Ardabil, Iran · GPA 18.7 / 20</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills">
+      <h2>Skills and languages</h2>
+      <div class="skills">
+        <div>
+          <h4>Structural analysis</h4>
+          <p><a href="https://opensees.berkeley.edu" target="_blank" rel="noopener">OpenSees</a>, <a href="https://openseespydoc.readthedocs.io" target="_blank" rel="noopener">OpenSeesPy</a>, ABAQUS, SAP2000, ETABS, SeismoStruct</p>
+        </div>
+        <div>
+          <h4>Methods</h4>
+          <p>Incremental dynamic analysis, nonlinear time-history analysis, fragility analysis, Bayesian updating, Monte Carlo simulation</p>
+        </div>
+        <div>
+          <h4>Programming</h4>
+          <p>Python, MATLAB, Tcl</p>
+        </div>
+        <div>
+          <h4>Design and tools</h4>
+          <p>Revit, AutoCAD, LaTeX, Git/GitHub, Microsoft Office, advanced Excel</p>
+        </div>
+      </div>
+
+      <h3>Languages</h3>
+      <dl class="lang">
+        <dt>Azerbaijani</dt><dd>Native</dd>
+        <dt>Persian</dt><dd>Native</dd>
+        <dt>Turkish</dt><dd>Fluent</dd>
+        <dt>English</dt><dd>Fluent</dd>
+        <dt>Arabic</dt><dd>Basic reading and writing</dd>
+      </dl>
+    </section>
+
+    <section id="awards">
+      <h2>Honors and awards</h2>
+      <ul class="awards">
+        <li>Full Ph.D. scholarship, Özyeğin University, 2021.</li>
+        <li>Full M.Sc. scholarship, Ministry of Science, Research and Technology, Iran.</li>
+        <li>Ranked 353rd of 35,643 candidates (top 1%) in the nationwide M.Sc. entrance examination, Iran, 2013.</li>
+        <li>TÜBİTAK 3501 Career Development Project: “Fire Following Earthquake in Industrial Buildings”, funded by the Scientific and Technological Research Council of Türkiye.</li>
+      </ul>
+    </section>
+
+    <section id="references">
+      <h2>References</h2>
+      <div class="refs">
+        <div class="ref">
+          <strong>Asst. Prof. Derya Deniz</strong>
+          <span>Department of Civil Engineering</span>
+          <span>Özyeğin University, Istanbul, Türkiye</span>
+          <a href="mailto:derya.deniz@ozyegin.edu.tr">derya.deniz@ozyegin.edu.tr</a>
+        </div>
+        <div class="ref">
+          <strong>Prof. Nader Fanaie</strong>
+          <span>Department of Civil Engineering</span>
+          <span>K. N. Toosi University of Technology, Tehran, Iran</span>
+          <a href="mailto:fanaie@kntu.ac.ir">fanaie@kntu.ac.ir</a>
+        </div>
+        <div class="ref">
+          <strong>Assoc. Prof. Mohtasham Mohebbi</strong>
+          <span>Department of Civil Engineering</span>
+          <span>University of Mohaghegh Ardabili, Ardabil, Iran</span>
+          <a href="mailto:mohebbi@uma.ac.ir">mohebbi@uma.ac.ir</a>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span>© <span id="year">2026</span> Ramin Sheikhi Garjan</span>
+      <span>Last updated September 2026</span>
+    </footer>
+  </main>
+</div>
+
+<script>
+/* Seismogram trace: P-wave onset, stronger S-wave arrival, exponential coda decay */
+(function(){
+  var seed = 7;
+  function rnd(){ seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+  var comps = [];
+  for (var i = 0; i < 9; i++) comps.push({f: 0.08 + rnd()*0.5, p: rnd()*6.283, a: 0.4 + rnd()*0.6});
+  var tP = 170, tS = 330, d = "";
+  for (var x = 0; x <= 1000; x += 2){
+    var env = 0.6;
+    if (x > tP) env += 7 * (1 - Math.exp(-(x - tP)/12)) * Math.exp(-(x - tP)/220);
+    if (x > tS) env += 38 * (1 - Math.exp(-(x - tS)/8)) * Math.exp(-(x - tS)/140);
+    var s = 0; for (var k = 0; k < comps.length; k++) s += comps[k].a * Math.sin(comps[k].f*x + comps[k].p);
+    s = s / 3 + (rnd() - 0.5) * 0.5;
+    var y = Math.max(2, Math.min(94, 48 + env * s));
+    d += (x ? "L" : "M") + x + " " + y.toFixed(1);
+  }
+  var wave = document.getElementById("wave");
+  wave.setAttribute("d", d);
+  document.getElementById("markP").setAttribute("d", "M"+tP+" 6V90");
+  document.getElementById("markS").setAttribute("d", "M"+tS+" 6V90");
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!reduce && wave.getTotalLength){
+    var L = wave.getTotalLength();
+    wave.style.strokeDasharray = L;
+    wave.style.strokeDashoffset = L;
+    wave.getBoundingClientRect();
+    wave.style.transition = "stroke-dashoffset 2.6s cubic-bezier(.3,.1,.3,1)";
+    requestAnimationFrame(function(){ wave.style.strokeDashoffset = 0; });
+  }
+})();
+
+/* Highlight the current section in the navigation */
+(function(){
+  var links = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
+  var map = {};
+  links.forEach(function(a){ map[a.getAttribute("href").slice(1)] = a; });
+  if (!("IntersectionObserver" in window)) return;
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if (e.isIntersecting){
+        links.forEach(function(a){ a.classList.remove("active"); });
+        var a = map[e.target.id];
+        if (a){ a.classList.add("active"); if (a.scrollIntoView && window.innerWidth <= 900) a.scrollIntoView({block:"nearest", inline:"center"}); }
+      }
+    });
+  }, {rootMargin: "-20% 0px -70% 0px"});
+  Object.keys(map).forEach(function(id){ var el = document.getElementById(id); if (el) io.observe(el); });
+  document.getElementById("year").textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
