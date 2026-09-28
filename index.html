@@ -1,750 +1,464 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Ramin Sheikhi Garjan | Structural &amp; Earthquake Engineering</title>
-<meta name="description" content="Ramin Sheikhi Garjan, Ph.D. candidate in Structural Engineering at Özyeğin University, Istanbul. Research on multi-hazard performance of precast industrial buildings: fire following earthquake, seismic fragility and post-earthquake assessment.">
-<meta name="author" content="Ramin Sheikhi Garjan">
-<meta property="og:title" content="Ramin Sheikhi Garjan | Structural &amp; Earthquake Engineering">
-<meta property="og:description" content="Multi-hazard performance assessment of industrial buildings: fire following earthquake, seismic fragility, post-earthquake reconnaissance.">
-<meta property="og:type" content="profile">
-<meta name="theme-color" content="#F3F5F6" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#11171D" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏗️</text></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ramin Sheikhi Garjan — Ph.D. researcher in Structural Engineering at Ozyegin University, working on multi-hazard performance of buildings.">
+  <title>Ramin Sheikhi Garjan — Structural Engineer</title>
 
-<!--
-  ============================================================
-  EDIT YOUR LINKS HERE
-  ------------------------------------------------------------
-  1. Google Scholar: replace the href of the element with
-     class="js-scholar" with your profile URL,
-     e.g. https://scholar.google.com/citations?user=XXXXXXXXXXXX
-     It currently points to a Scholar author search as a fallback.
-  2. Photo: embedded directly in this file, so no extra upload is
-     needed. To use a separate image instead, replace the long
-     src="data:image/jpeg;base64,..." with src="photo.jpg".
-  3. Optional profiles (ORCID, ResearchGate, LinkedIn): uncomment
-     the lines marked OPTIONAL in the sidebar and add your URLs.
-  ============================================================
--->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Serif+4:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
 
-<style>
-:root{
-  --bg:#F3F5F6;
-  --surface:#FFFFFF;
-  --ink:#16202B;
-  --steel:#56636F;
-  --rule:#D6DCE1;
-  --accent:#1D5FA8;
-  --accent-soft:#E4EDF7;
-  --ember:#C4471D;
-  --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
-  --sans:"IBM Plex Sans", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
-  box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#11171D; --surface:#182129; --ink:#E6EBEF; --steel:#9AA7B2;
-    --rule:#2B3640; --accent:#6FA8E6; --accent-soft:#1C2E42; --ember:#E8774F;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#11171D; --surface:#182129; --ink:#E6EBEF; --steel:#9AA7B2;
-  --rule:#2B3640; --accent:#6FA8E6; --accent-soft:#1C2E42; --ember:#E8774F;
-}
-*,*::before,*::after{box-sizing:inherit}
-html{scroll-behavior:smooth;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 24px)}
-@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
-body{
-  margin:0;background:var(--bg);color:var(--ink);
-  font-family:var(--sans);font-size:1rem;line-height:1.65;
-  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
-}
-a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:3px}
-a:hover{text-decoration-thickness:2px}
-a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
-img{max-width:100%;display:block}
-.skip{position:absolute;left:-9999px;top:0;background:var(--ink);color:var(--bg);padding:8px 14px;z-index:20}
-.skip:focus{left:12px;top:calc(env(safe-area-inset-top,0px) + 12px)}
-
-/* ---------- Justified running text ---------- */
-main p, main li, .theme p, .project p{
-  text-align:justify;
-  text-justify:inter-word;
-  -webkit-hyphens:auto; hyphens:auto;
-  hyphenate-limit-chars:7 3 3;
-}
-
-/* ---------- Layout ---------- */
-.shell{
-  display:grid;grid-template-columns:300px minmax(0,1fr);
-  max-width:1180px;margin:0 auto;min-height:100vh;
-}
-.sidebar{
-  position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;
-  padding:44px 32px 32px;border-right:1px solid var(--rule);
-  scrollbar-width:thin;
-}
-main{padding:52px 56px 64px;max-width:820px}
-
-/* ---------- Sidebar ---------- */
-.id{display:block}
-.portrait{
-  width:156px;aspect-ratio:372/491;margin:0 0 22px;position:relative;isolation:isolate;
-}
-.portrait img{
-  width:100%;height:100%;object-fit:cover;object-position:50% 20%;
-  border-radius:4px;border:1px solid var(--rule);background:var(--surface);
-}
-.portrait::after{
-  /* offset steel frame, like a drawing border */
-  content:"";position:absolute;inset:8px -8px -8px 8px;border:1px solid var(--accent);
-  border-radius:4px;z-index:-1;opacity:.55;
-}
-.name{
-  font-family:var(--serif);font-weight:700;font-size:2rem;line-height:1.1;
-  margin:0 0 12px;letter-spacing:-0.01em;
-}
-.role{margin:0;color:var(--steel);font-size:.95rem;line-height:1.5}
-.role a{color:inherit}
-.links{list-style:none;padding:0;margin:26px 0 0;display:grid;gap:10px;font-size:.92rem}
-.links a{display:flex;gap:10px;align-items:center;color:var(--ink);text-decoration:none;min-width:0}
-.links span{overflow-wrap:anywhere}
-.links a:hover span{text-decoration:underline;text-underline-offset:3px}
-.links svg{width:18px;height:18px;flex:none;color:var(--steel)}
-.toc{margin-top:32px;border-top:1px solid var(--rule);padding-top:18px}
-.toc ul{list-style:none;padding:0;margin:0;display:grid;gap:2px}
-.toc a{
-  display:block;padding:5px 0 5px 12px;border-left:2px solid transparent;
-  color:var(--steel);text-decoration:none;font-size:.92rem;
-  transition:color .15s,border-color .15s;
-}
-.toc a:hover{color:var(--ink)}
-.toc a.active{color:var(--ink);border-left-color:var(--accent);font-weight:500}
-
-/* ---------- Opening ---------- */
-.trace{display:block;width:100%;height:96px;margin:0 0 30px;overflow:visible}
-.trace path{fill:none;stroke:var(--ink);stroke-width:1.2;stroke-linejoin:round}
-.trace .base{stroke:var(--rule);stroke-width:1}
-.trace .mark{stroke:var(--ember);stroke-width:1;stroke-dasharray:3 3}
-.trace text{font-family:var(--sans);font-size:11px;fill:var(--steel)}
-.lede{
-  font-family:var(--serif);font-size:1.6rem;line-height:1.35;font-weight:500;
-  margin:0 0 22px;max-width:30ch;letter-spacing:-0.005em;text-wrap:balance;
-}
-main .lede{text-align:left;hyphens:manual}
-.intro p{max-width:68ch}
-
-/* ---------- Sections ---------- */
-section{padding-top:60px}
-h2{
-  font-family:var(--serif);font-size:1.6rem;font-weight:600;margin:0 0 22px;
-  padding-bottom:10px;border-bottom:1px solid var(--rule);letter-spacing:-0.005em;
-  position:relative;
-}
-h2::after{
-  content:"";position:absolute;left:0;bottom:-1px;width:44px;height:2px;background:var(--accent);
-}
-h3{font-family:var(--serif);font-size:1.08rem;font-weight:600;font-style:italic;margin:30px 0 10px;color:var(--steel)}
-p{margin:0 0 14px}
-
-/* research themes */
-.themes{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:26px 34px}
-.theme{padding-top:12px;border-top:1px solid var(--rule)}
-.theme h4{font-family:var(--serif);font-size:1.1rem;font-weight:600;margin:0 0 6px;line-height:1.3}
-.theme p{font-size:.95rem;color:var(--steel);margin:0}
-
-/* projects */
-.project{
-  background:var(--surface);border:1px solid var(--rule);border-left:3px solid var(--accent);
-  padding:20px 24px;margin-bottom:16px;border-radius:2px;
-}
-.project h4{font-family:var(--serif);font-size:1.15rem;font-weight:600;margin:0 0 4px;line-height:1.35}
-.project .meta{font-size:.88rem;color:var(--steel);margin-bottom:10px}
-.project p{font-size:.95rem;margin:0}
-
-/* timeline entries: a real chronology, so a rail with nodes */
-.timeline{position:relative}
-.entry{
-  display:grid;grid-template-columns:120px minmax(0,1fr);gap:4px 28px;
-  padding:0 0 26px;position:relative;
-}
-.entry:last-child{padding-bottom:0}
-.when{font-size:.88rem;color:var(--steel);font-variant-numeric:tabular-nums;padding-top:2px;text-align:right}
-.what{position:relative;padding-left:22px;border-left:1px solid var(--rule)}
-.entry:last-child .what{border-left-color:transparent}
-.what::before{
-  content:"";position:absolute;left:-5px;top:7px;width:9px;height:9px;border-radius:50%;
-  background:var(--bg);border:2px solid var(--accent);
-}
-.entry.current .what::before{background:var(--accent)}
-.what h4{margin:0;font-size:1.04rem;font-weight:600;line-height:1.4}
-.what .where{color:var(--steel);font-size:.93rem;margin:2px 0 0}
-.what .detail{color:var(--steel);font-size:.88rem;margin:2px 0 0}
-.what ul{margin:10px 0 0;padding-left:18px}
-.what li{margin-bottom:6px;font-size:.95rem}
-.what li::marker{color:var(--steel)}
-.what .note{font-size:.93rem;margin:8px 0 0}
-.what .note + .note{margin-top:2px}
-
-/* publications */
-.pubs{list-style:none;padding:0;margin:0}
-.pubs li{
-  display:grid;grid-template-columns:40px minmax(0,1fr);gap:0 10px;
-  padding:14px 0;border-top:1px solid var(--rule);font-size:.95rem;text-align:left;
-}
-.pubs li:first-child{border-top:0;padding-top:4px}
-.pubs li::before{
-  content:attr(data-id);font-size:.82rem;font-weight:600;color:var(--accent);
-  font-variant-numeric:tabular-nums;padding-top:2px;
-}
-.pub-title{font-family:var(--serif);font-size:1.02rem;font-weight:600;display:block;margin-bottom:3px;line-height:1.45}
-.pub-authors{display:block;color:var(--steel)}
-.pub-authors b{color:var(--ink);font-weight:600}
-.pub-venue{display:block;font-style:italic}
-.pub-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.tag{
-  display:inline-block;font-size:.8rem;padding:2px 9px;border:1px solid var(--rule);
-  border-radius:3px;color:var(--steel);text-decoration:none;background:var(--surface);
-}
-a.tag:hover{border-color:var(--accent);color:var(--accent)}
-.status{color:var(--ember);border-color:currentColor;background:transparent}
-
-/* skills */
-.skills{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:22px 34px}
-.skills h4{font-size:.95rem;font-weight:600;margin:0 0 6px}
-.skills p{font-size:.95rem;color:var(--steel);margin:0}
-.lang{display:grid;grid-template-columns:auto 1fr;gap:6px 24px;font-size:.95rem;margin:0}
-.lang dt{font-weight:500}
-.lang dd{margin:0;color:var(--steel)}
-
-/* awards */
-.awards{padding-left:18px;margin:0}
-.awards li{margin-bottom:9px}
-.awards li::marker{color:var(--accent)}
-
-/* references */
-.refs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
-.ref{font-size:.93rem;line-height:1.55;padding:16px 18px;background:var(--surface);border:1px solid var(--rule);border-radius:2px}
-.ref strong{display:block;font-family:var(--serif);font-size:1.04rem;margin-bottom:2px}
-.ref span{display:block;color:var(--steel)}
-.ref a{display:inline-block;margin-top:6px;overflow-wrap:anywhere}
-
-footer{
-  margin-top:76px;padding-top:20px;border-top:1px solid var(--rule);
-  font-size:.85rem;color:var(--steel);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
-}
-
-/* ---------- Responsive ---------- */
-@media (max-width: 900px){
-  .shell{display:block}
-  .sidebar{
-    position:static;height:auto;border-right:0;border-bottom:1px solid var(--rule);
-    padding:32px 24px 0;overflow:visible;
-  }
-  .id{display:grid;grid-template-columns:104px minmax(0,1fr);gap:0 20px;align-items:center}
-  .portrait{width:104px;margin:0}
-  .portrait::after{inset:6px -6px -6px 6px}
-  .name{font-size:1.65rem}
-  .links{grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px 20px}
-  .toc{
-    position:sticky;top:0;margin:26px -24px 0;padding:0;background:var(--bg);
-    border-top:1px solid var(--rule);z-index:5;padding-top:env(safe-area-inset-top,0px);
-  }
-  .toc ul{display:flex;overflow-x:auto;gap:0;padding:0 16px;scrollbar-width:none}
-  .toc ul::-webkit-scrollbar{display:none}
-  .toc a{white-space:nowrap;border-left:0;border-bottom:2px solid transparent;padding:12px 10px}
-  .toc a.active{border-bottom-color:var(--accent)}
-  main{padding:32px 24px 48px}
-  .lede{font-size:1.35rem}
-  html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 60px)}
-}
-@media (max-width: 560px){
-  .id{grid-template-columns:84px minmax(0,1fr);gap:0 16px}
-  .portrait{width:84px}
-  .name{font-size:1.4rem;margin-bottom:6px}
-  .role{font-size:.88rem}
-  .entry{grid-template-columns:1fr}
-  .when{text-align:left;padding:0 0 4px 22px;border-left:1px solid var(--rule)}
-  .entry:last-child .when{border-left-color:var(--rule)}
-  .pubs li{grid-template-columns:34px minmax(0,1fr)}
-}
-@media print{
-  :root{--bg:#fff;--surface:#fff;--ink:#000;--steel:#333;--rule:#bbb;--accent:#000}
-  .sidebar{position:static;height:auto;border:0;padding:0}
-  .toc,.trace,.skip{display:none}
-  .shell{display:block}
-  main{padding:0;max-width:none}
-  section{padding-top:28px;break-inside:auto}
-  .entry,.pubs li,.project{break-inside:avoid}
-  a{color:inherit;text-decoration:none}
-}
-
-
-  /* YouTube embed: responsive 16:9 */
-.video-embed{
-  position:relative;width:100%;aspect-ratio:16/9;
-  background:var(--surface);border:1px solid var(--rule);border-radius:2px;overflow:hidden;
-}
-.video-embed iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-@media print{ #video{display:none} }
-</style>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<a class="skip" href="#main">Skip to content</a>
-<div class="shell">
 
-  <!-- ===================== SIDEBAR ===================== -->
-  <aside class="sidebar">
-    <div class="id">
-      <figure class="portrait">
-        <img src="data:image/jpeg;base64,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" width="372" height="491" alt="Portrait of Ramin Sheikhi Garjan">
-      </figure>
-      <div>
-        <h1 class="name">Ramin Sheikhi Garjan</h1>
-        <p class="role">Ph.D. Candidate, Structural Engineering<br>
-          Department of Civil Engineering<br>
-          <a href="https://www.ozyegin.edu.tr/en" target="_blank" rel="noopener">Özyeğin University</a>, Istanbul, Türkiye</p>
+  <!-- ========== HEADER / NAV ========== -->
+  <header class="header" id="header">
+    <nav class="nav container">
+      <a href="#home" class="logo">R. Sheikhi<span>.</span></a>
+
+      <ul class="nav__menu" id="navMenu">
+        <li><a href="#about" class="nav__link">About</a></li>
+        <li><a href="#education" class="nav__link">Education</a></li>
+        <li><a href="#experience" class="nav__link">Experience</a></li>
+        <li><a href="#publications" class="nav__link">Publications</a></li>
+        <li><a href="#skills" class="nav__link">Skills</a></li>
+        <li><a href="#contact" class="nav__link">Contact</a></li>
+      </ul>
+
+      <div class="nav__actions">
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle dark mode">
+          <span class="icon-sun">☀</span>
+          <span class="icon-moon">☾</span>
+        </button>
+        <button class="nav__toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ========== HERO ========== -->
+    <section class="hero" id="home">
+      <div class="container hero__inner">
+        <div class="hero__text">
+          <p class="eyebrow">Ph.D. Researcher · Ozyegin University</p>
+          <h1 class="hero__title">
+            Ramin Sheikhi Garjan
+          </h1>
+          <p class="hero__sub">
+            Researching <span class="gradient-text" id="typed"></span><span class="cursor">|</span>
+          </p>
+          <p class="hero__desc">
+            Structural engineer studying how buildings perform when hazards arrive in sequence —
+            earthquakes followed by fires and debris flows — using nonlinear computational models
+            in OpenSees and OpenSeesPy.
+          </p>
+          <div class="hero__buttons">
+            <a href="#publications" class="btn btn--primary">View publications</a>
+            <a href="Ramin_Sheikhi_Resume.pdf" class="btn btn--ghost" download>Download CV</a>
+          </div>
+
+          <ul class="stats">
+            <li><strong class="counter" data-target="10" data-suffix="+">0</strong><span>Years in engineering</span></li>
+            <li><strong class="counter" data-target="8">0</strong><span>Publications</span></li>
+            <li><strong class="counter" data-target="2">0</strong><span>TÜBİTAK projects</span></li>
+          </ul>
+        </div>
+
+        <div class="hero__visual" aria-hidden="true">
+          <div class="blob"></div>
+          <div class="card-float card-float--1">
+            <span class="dot dot--green"></span> GPA 3.91 / 4.00
+          </div>
+          <div class="card-float card-float--2">
+            <strong>Multi-hazard</strong>
+            <small>Earthquake · Fire · Debris flow</small>
+          </div>
+          <div class="avatar">RS</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== ABOUT / RESEARCH INTERESTS ========== -->
+    <section class="section" id="about">
+      <div class="container about">
+        <div class="about__content reveal">
+          <p class="eyebrow">About me</p>
+          <h2 class="section__title">From design offices to multi-hazard research.</h2>
+          <p>
+            I am a Ph.D. candidate in Structural Engineering at Ozyegin University, Istanbul,
+            advised by Asst. Prof. Derya Deniz. My thesis examines the multi-hazard performance of
+            structural buildings considering fires and debris flows after earthquakes.
+          </p>
+          <p>
+            Before my doctorate I spent six years as a structural engineer designing and supervising
+            reinforced concrete and steel buildings, and I carried out field reconnaissance of
+            industrial facilities after the 2023 Kahramanmaraş earthquake sequence.
+          </p>
+        </div>
+
+        <div class="interests reveal">
+          <h3 class="interests__title">Research interests</h3>
+          <ul class="interests__list">
+            <li><span>01</span>Multi-hazard performance and risk assessment of structures (fire following earthquake, debris flows)</li>
+            <li><span>02</span>Seismic and thermal analysis using computational methods (OpenSees, OpenSeesPy)</li>
+            <li><span>03</span>Structural health monitoring and damage assessment</li>
+            <li><span>04</span>Ground motion prediction and uncertainty quantification</li>
+            <li><span>05</span>Performance-based seismic design of industrial buildings</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== EDUCATION ========== -->
+    <section class="section section--alt" id="education">
+      <div class="container">
+        <div class="section__head reveal">
+          <p class="eyebrow">Education</p>
+          <h2 class="section__title">Academic background</h2>
+        </div>
+
+        <ol class="timeline">
+          <li class="timeline__item reveal">
+            <div class="timeline__meta">
+              <span class="timeline__date">2021 – Present</span>
+              <span class="badge">GPA 3.91 / 4.00</span>
+            </div>
+            <h3>Ph.D. in Structural Engineering</h3>
+            <p class="timeline__place">Ozyegin University, Istanbul, Türkiye</p>
+            <p><em>Thesis:</em> Multi-hazard Performance of Structural Buildings Considering Fires and Debris Flows After Earthquakes</p>
+            <p class="timeline__note">Advisor: Asst. Prof. Derya Deniz</p>
+          </li>
+          <li class="timeline__item reveal">
+            <div class="timeline__meta">
+              <span class="timeline__date">2013 – 2015</span>
+              <span class="badge">GPA 15.7 / 20</span>
+            </div>
+            <h3>M.Sc. in Structural Engineering</h3>
+            <p class="timeline__place">K. N. Toosi University of Technology, Tehran, Iran</p>
+            <p><em>Thesis:</em> Investigation on Seismic Behavior of Eccentric Split-X Bracing Using Incremental Dynamic Analysis</p>
+            <p class="timeline__note">Advisor: Prof. Nader Fanaie</p>
+          </li>
+          <li class="timeline__item reveal">
+            <div class="timeline__meta">
+              <span class="timeline__date">2008 – 2013</span>
+              <span class="badge">GPA 16.3 / 20</span>
+            </div>
+            <h3>B.Sc. in Civil Engineering</h3>
+            <p class="timeline__place">University of Mohaghegh Ardabili, Ardabil, Iran</p>
+          </li>
+          <li class="timeline__item reveal">
+            <div class="timeline__meta">
+              <span class="timeline__date">2004 – 2008</span>
+              <span class="badge">GPA 18.7 / 20</span>
+            </div>
+            <h3>Diploma in Mathematics and Physics</h3>
+            <p class="timeline__place">NODET (National Organization for Development of Exceptional Talents), Ardabil, Iran</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ========== EXPERIENCE ========== -->
+    <section class="section" id="experience">
+      <div class="container">
+        <div class="section__head reveal">
+          <p class="eyebrow">Experience</p>
+          <h2 class="section__title">Research & professional work</h2>
+        </div>
+
+        <div class="experience">
+          <article class="job reveal">
+            <div class="job__head">
+              <div>
+                <h3>Ph.D. Researcher</h3>
+                <p class="job__place">Ozyegin University, Istanbul, Türkiye</p>
+              </div>
+              <span class="timeline__date">2021 – Present</span>
+            </div>
+            <ul>
+              <li>Principal researcher on TÜBİTAK 3501 project <em>“Fire Following Earthquake in Industrial Buildings”</em> and TÜBİTAK 1719 Eureka Network project <em>“GIS-Based Platform for Urban Seismic Resilience (GURU)”</em>, funded under the Eureka Network 2024 National Call on Post-Earthquake Resilience.</li>
+              <li>Developed advanced OpenSees and OpenSeesPy models for multi-hazard evaluation of structures under sequential earthquake–fire scenarios.</li>
+              <li>Ran parametric studies and Monte Carlo simulations on fire propagation and debris-flow impacts on structural performance.</li>
+              <li>Performed field reconnaissance and data analysis after the 2023 Kahramanmaraş earthquake sequence, collaborating with international teams.</li>
+            </ul>
+          </article>
+
+          <article class="job reveal">
+            <div class="job__head">
+              <div>
+                <h3>Structural Engineer</h3>
+                <p class="job__place">Moshaverin 7 Cheshme Consulting Engineers, Ardabil, Iran</p>
+              </div>
+              <span class="timeline__date">Nov 2015 – 2021</span>
+            </div>
+            <ul>
+              <li>Designed and supervised reinforced concrete and steel buildings across residential, commercial and public infrastructure projects.</li>
+              <li>Prepared engineering drawings, technical specifications and structural analysis reports.</li>
+              <li>Coordinated with contractors and clients through to project delivery.</li>
+            </ul>
+          </article>
+
+          <article class="job reveal">
+            <div class="job__head">
+              <div>
+                <h3>Graduate Research Assistant</h3>
+                <p class="job__place">K. N. Toosi University of Technology, Tehran, Iran</p>
+              </div>
+              <span class="timeline__date">2013 – 2015</span>
+            </div>
+            <ul>
+              <li>Incremental dynamic and nonlinear time-history analyses of eccentrically braced frames with shape memory alloy (SMA) dampers.</li>
+              <li>Studied seismic performance of irregular steel frames and steel shear wall systems.</li>
+            </ul>
+          </article>
+
+          <article class="job reveal">
+            <div class="job__head">
+              <div>
+                <h3>Teaching Assistant</h3>
+                <p class="job__place">University of Mohaghegh Ardabili & Islamic Azad University, Ardabil, Iran</p>
+              </div>
+              <span class="timeline__date">2013 – 2015</span>
+            </div>
+            <ul>
+              <li>Structural Analysis I & II and Steel Structures II.</li>
+              <li>Assisted Dr. Amin Ghanadasl, Dr. Ali Mansoori and Dr. Kazem Shakeri.</li>
+            </ul>
+          </article>
+
+          <article class="job reveal">
+            <div class="job__head">
+              <div>
+                <h3>Physics & Mathematics Teacher, Educational Consultant</h3>
+                <p class="job__place">Kanun-e-Farhangi Amuzesh (Ghalamchi), Ardabil, Iran</p>
+              </div>
+              <span class="timeline__date">2008 – 2013</span>
+            </div>
+            <ul>
+              <li>Taught advanced physics and mathematics to high school students and developed curriculum materials.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== PUBLICATIONS ========== -->
+    <section class="section section--alt" id="publications">
+      <div class="container">
+        <div class="section__head reveal">
+          <p class="eyebrow">Publications</p>
+          <h2 class="section__title">Papers & proceedings</h2>
+        </div>
+
+        <div class="filters reveal">
+          <button class="filter active" data-filter="all">All</button>
+          <button class="filter" data-filter="journal">Journal</button>
+          <button class="filter" data-filter="conference">Conference</button>
+          <button class="filter" data-filter="preparation">In preparation</button>
+        </div>
+
+        <ol class="pubs">
+          <li class="pub reveal" data-category="journal">
+            <span class="tag tag--journal">Journal · 2023</span>
+            <h3>Field reconnaissance on seismic performance and functionality of Turkish industrial facilities affected by the 2023 Kahramanmaraş earthquake sequence</h3>
+            <p class="pub__authors">G. Sagbas, <strong>R. Sheikhi</strong>, K. Sarikaya, D. Deniz</p>
+            <p class="pub__venue"><em>Bulletin of Earthquake Engineering</em>, Vol. 70, 2023</p>
+            <a class="pub__link" href="https://doi.org/10.1007/s10518-023-01741-8" target="_blank" rel="noopener">DOI: 10.1007/s10518-023-01741-8 ↗</a>
+          </li>
+          <li class="pub reveal" data-category="journal">
+            <span class="tag tag--journal">Journal · 2021</span>
+            <h3>Seismic Behaviour Assessment of Eccentrically Split-X Braced Frames</h3>
+            <p class="pub__authors"><strong>R. Sheikhi</strong>, N. Fanaie</p>
+            <p class="pub__venue"><em>Scientia Iranica</em>, Vol. 28(1), pp. 65–84, 2021</p>
+            <a class="pub__link" href="https://doi.org/10.24200/sci.2019.5054.1073" target="_blank" rel="noopener">DOI: 10.24200/sci.2019.5054.1073 ↗</a>
+          </li>
+          <li class="pub reveal" data-category="preparation">
+            <span class="tag tag--prep">In preparation · 2025</span>
+            <h3>Risk Assessment of Fire Following Earthquake in Industrial Precast Buildings</h3>
+            <p class="pub__authors"><strong>R. Sheikhi</strong>, D. Deniz</p>
+          </li>
+          <li class="pub reveal" data-category="conference">
+            <span class="tag">Conference · 2024</span>
+            <h3>Field Observations for Industrial Buildings After 2023 Kahramanmaras Earthquakes</h3>
+            <p class="pub__authors">G. Sagbas, <strong>R. Sheikhi</strong></p>
+            <p class="pub__venue"><em>Proceedings of the 7th International Conference on Earthquake Engineering</em>, 2024</p>
+          </li>
+          <li class="pub reveal" data-category="conference">
+            <span class="tag">Conference · 2024</span>
+            <h3>Structural and Nonstructural Loss Assessment Models for Industrial Facilities Affected by the 2023 Kahramanmaras Earthquakes</h3>
+            <p class="pub__authors">D. M. K. Sarikaya, G. Sagbas, N. S. Ayhan, <strong>R. Sheikhi</strong></p>
+            <p class="pub__venue"><em>6th International Disaster Resilience Congress (IDRC)</em>, Ankara, Türkiye, December 16–20, 2024</p>
+          </li>
+          <li class="pub reveal" data-category="conference">
+            <span class="tag">Conference · 2024</span>
+            <h3>Recovery Models for Industrial Buildings after the 2023 Türkiye Earthquakes</h3>
+            <p class="pub__authors">D. N. S. Ayhan, G. Sagbas, <strong>R. Sheikhi</strong>, M. K. Sarikaya</p>
+            <p class="pub__venue"><em>8th Asian-Pacific Symposium on Structural Reliability and Its Applications</em>, 2024</p>
+          </li>
+          <li class="pub reveal" data-category="conference">
+            <span class="tag">Conference · 2024</span>
+            <h3>Impact Models for Industrial Facilities Affected by the 2023 Kahramanmaras, Türkiye Earthquakes</h3>
+            <p class="pub__authors"><strong>R. Sheikhi</strong>, G. Sagbas, M. K. Sarikaya</p>
+            <p class="pub__venue"><em>Proceedings of the 18th World Conference on Earthquake Engineering (18WCEE)</em>, 2024</p>
+          </li>
+          <li class="pub reveal" data-category="conference">
+            <span class="tag">Conference · 2023</span>
+            <h3>A Multi-Hazard Resilience Framework for Residential Building Stocks subjected to Floods and Debris Flows</h3>
+            <p class="pub__authors">D. Deniz, A. Buğra Ceyhan, Y. Moaiyedfar, <strong>R. Sheikhi</strong></p>
+            <p class="pub__venue"><em>EGU General Assembly Conference Abstracts</em>, EGU-8868, 2023</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ========== SKILLS / LANGUAGES ========== -->
+    <section class="section" id="skills">
+      <div class="container">
+        <div class="section__head reveal">
+          <p class="eyebrow">Skills</p>
+          <h2 class="section__title">Tools & languages</h2>
+        </div>
+
+        <div class="skills-grid">
+          <div class="skill-card reveal">
+            <div class="skill-card__icon">🏗️</div>
+            <h3>Structural Analysis</h3>
+            <ul class="chips">
+              <li>OpenSees</li><li>OpenSeesPy</li><li>ABAQUS</li><li>SAP2000</li><li>ETABS</li><li>SeismoStruct</li>
+            </ul>
+          </div>
+          <div class="skill-card reveal">
+            <div class="skill-card__icon">📐</div>
+            <h3>Design & Drafting</h3>
+            <ul class="chips"><li>Revit</li><li>AutoCAD</li></ul>
+          </div>
+          <div class="skill-card reveal">
+            <div class="skill-card__icon">💻</div>
+            <h3>Programming</h3>
+            <ul class="chips"><li>Python</li><li>MATLAB</li><li>TCL</li></ul>
+          </div>
+          <div class="skill-card reveal">
+            <div class="skill-card__icon">🧰</div>
+            <h3>General Tools</h3>
+            <ul class="chips"><li>LaTeX</li><li>GitHub</li><li>Advanced Excel</li><li>Microsoft Office</li></ul>
+          </div>
+        </div>
+
+        <div class="languages reveal">
+          <h3>Languages</h3>
+          <div class="lang">
+            <div class="lang__head"><span>Persian (Farsi)</span><span>Native</span></div>
+            <div class="lang__bar"><div class="lang__fill" data-width="100"></div></div>
+          </div>
+          <div class="lang">
+            <div class="lang__head"><span>Azerbaijani</span><span>Native</span></div>
+            <div class="lang__bar"><div class="lang__fill" data-width="100"></div></div>
+          </div>
+          <div class="lang">
+            <div class="lang__head"><span>Turkish</span><span>Fluent</span></div>
+            <div class="lang__bar"><div class="lang__fill" data-width="85"></div></div>
+          </div>
+          <div class="lang">
+            <div class="lang__head"><span>English</span><span>Fluent</span></div>
+            <div class="lang__bar"><div class="lang__fill" data-width="85"></div></div>
+          </div>
+          <div class="lang">
+            <div class="lang__head"><span>Arabic</span><span>Basic reading & writing</span></div>
+            <div class="lang__bar"><div class="lang__fill" data-width="30"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== HONORS ========== -->
+    <section class="section section--alt" id="honors">
+      <div class="container">
+        <div class="section__head reveal">
+          <p class="eyebrow">Recognition</p>
+          <h2 class="section__title">Honors & awards</h2>
+        </div>
+
+        <div class="awards">
+          <article class="award reveal">
+            <span class="award__icon">🏆</span>
+            <h3>Top 1% nationwide</h3>
+            <p>Ranked 353rd among 35,643 participants in Iran's Nationwide M.Sc. Entrance Examination, 2013.</p>
+          </article>
+          <article class="award reveal">
+            <span class="award__icon">🎓</span>
+            <h3>Full Ph.D. Scholarship</h3>
+            <p>Awarded a full doctoral scholarship at Ozyegin University, Türkiye, 2021.</p>
+          </article>
+          <article class="award reveal">
+            <span class="award__icon">📜</span>
+            <h3>Full M.Sc. Scholarship</h3>
+            <p>Awarded by the Ministry of Science, Research and Technology, Iran.</p>
+          </article>
+          <article class="award reveal">
+            <span class="award__icon">🔬</span>
+            <h3>TÜBİTAK 3501 Principal Investigator</h3>
+            <p>Career Development Project “Fire Following Earthquake in Industrial Buildings”, funded by the Scientific and Technological Research Council of Türkiye.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== CONTACT ========== -->
+    <section class="section" id="contact">
+      <div class="container contact">
+        <div class="contact__info reveal">
+          <p class="eyebrow">Contact</p>
+          <h2 class="section__title">Let's collaborate.</h2>
+          <p>Open to research collaborations, postdoctoral opportunities and engineering consultancy.</p>
+          <ul class="contact__list">
+            <li><span>✉</span><a href="mailto:ramin.sheikhi@ozu.edu.tr">ramin.sheikhi@ozu.edu.tr</a></li>
+            <li><span>📍</span> Istanbul, Türkiye</li>
+            <li><span>🎓</span><a href="https://scholar.google.com/" target="_blank" rel="noopener">Google Scholar ↗</a></li>
+          </ul>
+        </div>
+
+        <form class="form reveal" id="contactForm" novalidate>
+          <div class="form__group">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" placeholder="Your name" required>
+            <small class="form__error"></small>
+          </div>
+          <div class="form__group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+            <small class="form__error"></small>
+          </div>
+          <div class="form__group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="5" placeholder="How can I help?" required></textarea>
+            <small class="form__error"></small>
+          </div>
+          <button type="submit" class="btn btn--primary btn--full">Send message</button>
+          <p class="form__success" id="formSuccess" role="status"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p>© <span id="year"></span> Ramin Sheikhi Garjan</p>
+      <div class="socials">
+        <a href="mailto:ramin.sheikhi@ozu.edu.tr">Email</a>
+        <a href="https://scholar.google.com/" target="_blank" rel="noopener">Scholar</a>
+        <a href="https://github.com/ramin-sheikhi" target="_blank" rel="noopener">GitHub</a>
       </div>
     </div>
+  </footer>
 
-    <ul class="links">
-      <li><a href="mailto:ramin.sheikhi@ozu.edu.tr">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="m3.5 6 8.5 7 8.5-7"/></svg>
-        <span>ramin.sheikhi@ozu.edu.tr</span></a></li>
-      <li><a href="tel:+905527785695">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>
-        <span>+90 552 778 5695</span></a></li>
-      <li><a class="js-scholar" href="https://scholar.google.com/citations?view_op=search_authors&amp;mauthors=Ramin+Sheikhi+Garjan" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3 1 9l11 6 9-4.9V17h2V9L12 3Zm-6 9.2V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-3.8l-6 3.3-6-3.3Z"/></svg>
-        <span>Google Scholar</span></a></li>
-      <li><a href="https://structurae.info/fr/litterature/auteurs/sheikhi-garjan-ramin-1727807" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 20V9l8-5 8 5v11M4 20h16M9 20v-6h6v6"/></svg>
-        <span>Structurae profile</span></a></li>
-      <li><a href="http://hdl.handle.net/10679/8819" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 4h10l4 4v12H5z"/><path d="M15 4v4h4M8 12h8M8 16h8"/></svg>
-        <span>ÖzÜ research repository</span></a></li>
-      <!-- OPTIONAL: <li><a href="https://orcid.org/0000-0000-0000-0000" target="_blank" rel="noopener"><span>ORCID</span></a></li> -->
-      <!-- OPTIONAL: <li><a href="https://www.researchgate.net/profile/YOUR-PROFILE" target="_blank" rel="noopener"><span>ResearchGate</span></a></li> -->
-      <!-- OPTIONAL: <li><a href="https://www.linkedin.com/in/YOUR-PROFILE" target="_blank" rel="noopener"><span>LinkedIn</span></a></li> -->
-    </ul>
+  <button class="to-top" id="toTop" aria-label="Back to top">↑</button>
 
-    <nav class="toc" aria-label="Sections">
-      <ul>
-        <li><a href="#about">About</a></li>
-        <li><a href="#research">Research</a></li>
-        <li><a href="#projects">Projects</a></li>
-        <li><a href="#publications">Publications</a></li>
-        <li><a href="#experience">Experience</a></li>
-        <li><a href="#education">Education</a></li>
-        <li><a href="#skills">Skills</a></li>
-        <li><a href="#awards">Awards</a></li>
-        <li><a href="#references">References</a></li>
-      </ul>
-    </nav>
-  </aside>
-
-  <!-- ===================== MAIN ===================== -->
-  <main id="main">
-
-    <section id="about" class="intro" style="padding-top:0">
-      <svg class="trace" id="trace" viewBox="0 0 1000 96" preserveAspectRatio="none" aria-hidden="true">
-        <path class="base" d="M0 48H1000"/>
-        <path class="mark" id="markP" d=""/>
-        <path class="mark" id="markS" d=""/>
-        <path id="wave" d=""/>
-      </svg>
-
-      <p class="lede">I study how industrial buildings behave when one hazard follows another: an earthquake, then fire.</p>
-      <p>I am a Ph.D. candidate in Structural Engineering at Özyeğin University in Istanbul, advised by Asst. Prof. Derya Deniz. My thesis develops a multi-hazard performance framework for buildings exposed to fire after earthquakes, with a focus on precast reinforced concrete industrial facilities, the backbone of Türkiye's manufacturing stock.</p>
-      <p>My work combines nonlinear numerical modelling in OpenSees and OpenSeesPy, incremental dynamic analysis, seismic and fire fragility analysis, and Bayesian updating of analytical fragility models with empirical damage data from the 2023 Kahramanmaraş earthquake sequence, where I took part in field reconnaissance of more than a hundred industrial facilities.</p>
-      <p>Before my doctorate I spent six years as a practising structural engineer designing and supervising reinforced concrete and steel buildings in Iran, which keeps my research grounded in how structures are actually designed and built.</p>
-    </section>
-<section id="video">
-  <h2>Video</h2>
-  <div class="video-embed">
-    <iframe
-      src="https://www.youtube-nocookie.com/embed/UaZQbW2UpLc?rel=0"
-      title="YouTube video player"
-      loading="lazy"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      referrerpolicy="strict-origin-when-cross-origin"
-      allowfullscreen></iframe>
-  </div>
-</section>
-
-    <section id="research">
-      <h2>Research</h2>
-      <div class="themes">
-        <div class="theme">
-          <h4>Fire following earthquake</h4>
-          <p>Sequential earthquake–fire analysis of precast RC industrial buildings: how seismic damage changes thermal response, fire resistance and collapse risk.</p>
-        </div>
-        <div class="theme">
-          <h4>Seismic fragility and Bayesian updating</h4>
-          <p>Analytical fragility curves from incremental dynamic analysis, updated with observed damage from the 2023 Kahramanmaraş earthquakes to reduce model uncertainty.</p>
-        </div>
-        <div class="theme">
-          <h4>Multi-hazard risk and resilience</h4>
-          <p>Loss, impact and recovery models for industrial facilities, and frameworks for building stocks subjected to earthquakes, floods and debris flows.</p>
-        </div>
-        <div class="theme">
-          <h4>Post-earthquake assessment</h4>
-          <p>Field reconnaissance protocols, damage and functionality data for industrial facilities, and structural health monitoring for damage assessment.</p>
-        </div>
-        <div class="theme">
-          <h4>Ground motion and uncertainty</h4>
-          <p>Ground motion selection and prediction, record-to-record variability and uncertainty quantification with Monte Carlo simulation.</p>
-        </div>
-        <div class="theme">
-          <h4>Performance-based design</h4>
-          <p>Performance-based seismic design of industrial buildings and innovative bracing systems, including eccentric split-X braced frames.</p>
-        </div>
-      </div>
-    </section>
-
-    <section id="projects">
-      <h2>Research projects</h2>
-      <div class="project">
-        <h4>Fire Following Earthquake in Industrial Buildings</h4>
-        <div class="meta"><a href="https://www.tubitak.gov.tr/en" target="_blank" rel="noopener">TÜBİTAK</a> 3501 Career Development Program, Özyeğin University</div>
-        <p>Numerical models and fragility-based risk assessment for precast industrial buildings subjected to sequential earthquake and fire scenarios, using OpenSees/OpenSeesPy thermo-mechanical analysis and Monte Carlo simulation.</p>
-      </div>
-      <div class="project">
-        <h4>GURU: GIS-Based Platform for Urban Seismic Resilience</h4>
-        <div class="meta"><a href="https://www.tubitak.gov.tr/en" target="_blank" rel="noopener">TÜBİTAK</a> 1719 and <a href="https://www.eurekanetwork.org" target="_blank" rel="noopener">Eureka Network</a>, 2024 National Call on Post-Earthquake Resilience</div>
-        <p>An international collaboration developing a GIS-based platform to support seismic resilience assessment and post-earthquake decision making in urban areas.</p>
-      </div>
-    </section>
-
-    <section id="publications">
-      <h2>Publications</h2>
-
-      <h3>Journal articles</h3>
-      <ol class="pubs">
-        <li data-id="J2">
-          <div>
-          <span class="pub-title">Field reconnaissance on seismic performance and functionality of Turkish industrial facilities affected by the 2023 Kahramanmaraş earthquake sequence</span>
-          <span class="pub-authors">G. Sağbaş, <b>R. Sheikhi Garjan</b>, M. K. Sarıkaya, D. Deniz</span>
-          <span class="pub-venue"><a href="https://link.springer.com/journal/10518" target="_blank" rel="noopener">Bulletin of Earthquake Engineering</a>, 22(1), 227–254, 2024</span>
-          <span class="pub-links">
-            <a class="tag" href="https://doi.org/10.1007/s10518-023-01741-8" target="_blank" rel="noopener">DOI</a>
-            <a class="tag" href="https://link.springer.com/article/10.1007/s10518-023-01741-8" target="_blank" rel="noopener">Springer</a>
-            <a class="tag" href="http://hdl.handle.net/10679/8819" target="_blank" rel="noopener">Repository</a>
-          </span>
-          </div>
-        </li>
-        <li data-id="J1">
-          <div>
-          <span class="pub-title">Seismic behaviour assessment of eccentrically split-X braced frames</span>
-          <span class="pub-authors"><b>R. Sheikhi</b>, N. Fanaie</span>
-          <span class="pub-venue"><a href="https://scientiairanica.sharif.edu" target="_blank" rel="noopener">Scientia Iranica</a>, 28(1), 65–84, 2021</span>
-          <span class="pub-links">
-            <a class="tag" href="https://doi.org/10.24200/sci.2019.5054.1073" target="_blank" rel="noopener">DOI</a>
-          </span>
-          </div>
-        </li>
-      </ol>
-
-      <h3>In preparation</h3>
-      <ol class="pubs">
-        <li data-id="P1">
-          <div>
-          <span class="pub-title">Risk assessment of fire following earthquake in industrial precast buildings</span>
-          <span class="pub-authors"><b>R. Sheikhi</b>, D. Deniz</span>
-          <span class="pub-links"><span class="tag status">In preparation</span></span>
-          </div>
-        </li>
-      </ol>
-
-      <h3>Conference papers</h3>
-      <ol class="pubs">
-        <li data-id="C5">
-          <div>
-          <span class="pub-title">Impact models for industrial facilities affected by the 2023 Kahramanmaraş, Türkiye earthquakes</span>
-          <span class="pub-authors"><b>R. Sheikhi</b>, G. Sağbaş, M. K. Sarıkaya</span>
-          <span class="pub-venue"><a href="https://www.wcee2024.it" target="_blank" rel="noopener">18th World Conference on Earthquake Engineering (18WCEE)</a>, Milan, 2024</span>
-          </div>
-        </li>
-        <li data-id="C4">
-          <div>
-          <span class="pub-title">Structural and nonstructural loss assessment models for industrial facilities affected by the 2023 Kahramanmaraş earthquakes</span>
-          <span class="pub-authors">M. K. Sarıkaya, G. Sağbaş, N. S. Ayhan, <b>R. Sheikhi</b></span>
-          <span class="pub-venue">6th International Disaster and Resilience Congress (IDRC), Ankara, December 16–20, 2024</span>
-          </div>
-        </li>
-        <li data-id="C3">
-          <div>
-          <span class="pub-title">Recovery models for industrial buildings after the 2023 Türkiye earthquakes</span>
-          <span class="pub-authors">N. S. Ayhan, G. Sağbaş, <b>R. Sheikhi</b>, M. K. Sarıkaya</span>
-          <span class="pub-venue">8th Asian-Pacific Symposium on Structural Reliability and Its Applications (APSSRA), 2024</span>
-          </div>
-        </li>
-        <li data-id="C2">
-          <div>
-          <span class="pub-title">Field observations for industrial buildings after 2023 Kahramanmaraş earthquakes</span>
-          <span class="pub-authors">G. Sağbaş, <b>R. Sheikhi</b></span>
-          <span class="pub-venue">Proceedings of the 7th International Conference on Earthquake Engineering, 2024</span>
-          </div>
-        </li>
-        <li data-id="C1">
-          <div>
-          <span class="pub-title">A multi-hazard resilience framework for residential building stocks subjected to floods and debris flows</span>
-          <span class="pub-authors">D. Deniz, A. B. Ceyhan, Y. Moaiyedfar, <b>R. Sheikhi</b></span>
-          <span class="pub-venue"><a href="https://www.egu23.eu" target="_blank" rel="noopener">EGU General Assembly 2023</a>, Conference Abstracts, EGU23-8868</span>
-          </div>
-        </li>
-      </ol>
-    </section>
-
-    <section id="experience">
-      <h2>Experience</h2>
-      <div class="timeline">
-
-      <div class="entry current">
-        <div class="when">2021 – present</div>
-        <div class="what">
-          <h4>Ph.D. Researcher</h4>
-          <div class="where"><a href="https://www.ozyegin.edu.tr/en" target="_blank" rel="noopener">Özyeğin University</a>, Istanbul, Türkiye</div>
-          <ul>
-            <li>Researcher on the TÜBİTAK 3501 project “Fire Following Earthquake in Industrial Buildings” and the TÜBİTAK 1719 / Eureka Network project “GURU: GIS-Based Platform for Urban Seismic Resilience”.</li>
-            <li>Developed OpenSees and OpenSeesPy models for multi-hazard evaluation of structures under sequential earthquake–fire scenarios.</li>
-            <li>Ran parametric studies and Monte Carlo simulations on fire propagation and debris-flow impacts on structural performance.</li>
-            <li>Took part in field reconnaissance of industrial facilities after the 2023 Kahramanmaraş earthquake sequence and analysed the collected damage and functionality data.</li>
-            <li>Collaborated with international research teams on post-earthquake assessment of industrial facilities.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="entry">
-        <div class="when">2015 – 2021</div>
-        <div class="what">
-          <h4>Structural Engineer</h4>
-          <div class="where">Moshaverin 7 Cheshme Consulting Engineers, Ardabil, Iran</div>
-          <ul>
-            <li>Designed and supervised reinforced concrete and steel building projects: residential, commercial and public infrastructure.</li>
-            <li>Prepared engineering drawings, technical specifications and structural analysis reports.</li>
-            <li>Coordinated with contractors and clients through to project delivery.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="entry">
-        <div class="when">2013 – 2015</div>
-        <div class="what">
-          <h4>Graduate Research Assistant</h4>
-          <div class="where"><a href="https://www.kntu.ac.ir" target="_blank" rel="noopener">K. N. Toosi University of Technology</a>, Tehran, Iran</div>
-          <ul>
-            <li>Incremental dynamic analysis and nonlinear time-history analysis of eccentrically braced frames with shape memory alloy (SMA) dampers.</li>
-            <li>Seismic performance of irregular steel frames and steel plate shear wall systems.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="entry">
-        <div class="when">2013 – 2015</div>
-        <div class="what">
-          <h4>Teaching Assistant</h4>
-          <div class="where"><a href="https://www.uma.ac.ir" target="_blank" rel="noopener">University of Mohaghegh Ardabili</a> and Islamic Azad University, Ardabil, Iran</div>
-          <ul>
-            <li>Structural Analysis I &amp; II, Steel Structures II, with Dr. Amin Ghanadasl, Dr. Ali Mansoori and Dr. Kazem Shakeri.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="entry">
-        <div class="when">2008 – 2013</div>
-        <div class="what">
-          <h4>Physics and Mathematics Teacher, Educational Consultant</h4>
-          <div class="where">Kanun-e-Farhangi Amuzesh (Ghalamchi), Ardabil, Iran</div>
-          <ul>
-            <li>Taught advanced physics and mathematics to high-school students and developed curriculum materials.</li>
-          </ul>
-        </div>
-      </div>
-      </div>
-    </section>
-
-    <section id="education">
-      <h2>Education</h2>
-      <div class="timeline">
-
-      <div class="entry current">
-        <div class="when">2021 – present</div>
-        <div class="what">
-          <h4>Ph.D., Structural Engineering</h4>
-          <div class="where"><a href="https://www.ozyegin.edu.tr/en" target="_blank" rel="noopener">Özyeğin University</a>, Istanbul, Türkiye</div>
-          <div class="detail">GPA 3.91 / 4.00, full scholarship</div>
-          <p class="note"><strong>Thesis:</strong> Multi-hazard performance of structural buildings considering fires and debris flows after earthquakes</p>
-          <p class="note"><strong>Advisor:</strong> Asst. Prof. Derya Deniz</p>
-        </div>
-      </div>
-
-      <div class="entry">
-        <div class="when">2013 – 2015</div>
-        <div class="what">
-          <h4>M.Sc., Structural Engineering</h4>
-          <div class="where"><a href="https://www.kntu.ac.ir" target="_blank" rel="noopener">K. N. Toosi University of Technology</a>, Tehran, Iran</div>
-          <div class="detail">GPA 15.7 / 20, full scholarship</div>
-          <p class="note"><strong>Thesis:</strong> Investigation on seismic behavior of eccentric split-X bracing using incremental dynamic analysis</p>
-          <p class="note"><strong>Advisor:</strong> Prof. Nader Fanaie</p>
-        </div>
-      </div>
-
-      <div class="entry">
-        <div class="when">2008 – 2013</div>
-        <div class="what">
-          <h4>B.Sc., Civil Engineering</h4>
-          <div class="where"><a href="https://www.uma.ac.ir" target="_blank" rel="noopener">University of Mohaghegh Ardabili</a>, Ardabil, Iran</div>
-          <div class="detail">GPA 16.3 / 20</div>
-        </div>
-      </div>
-
-      <div class="entry">
-        <div class="when">2004 – 2008</div>
-        <div class="what">
-          <h4>Diploma, Mathematics and Physics</h4>
-          <div class="where">NODET (National Organization for Development of Exceptional Talents), Ardabil, Iran</div>
-          <div class="detail">GPA 18.7 / 20</div>
-        </div>
-      </div>
-      </div>
-    </section>
-
-    <section id="skills">
-      <h2>Skills and languages</h2>
-      <div class="skills">
-        <div>
-          <h4>Structural analysis</h4>
-          <p><a href="https://opensees.berkeley.edu" target="_blank" rel="noopener">OpenSees</a>, <a href="https://openseespydoc.readthedocs.io" target="_blank" rel="noopener">OpenSeesPy</a>, ABAQUS, SAP2000, ETABS, SeismoStruct</p>
-        </div>
-        <div>
-          <h4>Methods</h4>
-          <p>Incremental dynamic analysis, nonlinear time-history analysis, fragility analysis, Bayesian updating, Monte Carlo simulation</p>
-        </div>
-        <div>
-          <h4>Programming</h4>
-          <p>Python, MATLAB, Tcl</p>
-        </div>
-        <div>
-          <h4>Design and tools</h4>
-          <p>Revit, AutoCAD, LaTeX, Git/GitHub, Microsoft Office, advanced Excel</p>
-        </div>
-      </div>
-
-      <h3>Languages</h3>
-      <dl class="lang">
-        <dt>Azerbaijani</dt><dd>Native</dd>
-        <dt>Persian</dt><dd>Native</dd>
-        <dt>Turkish</dt><dd>Fluent</dd>
-        <dt>English</dt><dd>Fluent</dd>
-        <dt>Arabic</dt><dd>Basic reading and writing</dd>
-      </dl>
-    </section>
-
-    <section id="awards">
-      <h2>Honors and awards</h2>
-      <ul class="awards">
-        <li>Full Ph.D. scholarship, Özyeğin University, 2021.</li>
-        <li>Full M.Sc. scholarship, Ministry of Science, Research and Technology, Iran.</li>
-        <li>Ranked 353rd of 35,643 candidates (top 1%) in the nationwide M.Sc. entrance examination, Iran, 2013.</li>
-        <li>TÜBİTAK 3501 Career Development Project: “Fire Following Earthquake in Industrial Buildings”, funded by the Scientific and Technological Research Council of Türkiye.</li>
-      </ul>
-    </section>
-
-    <section id="references">
-      <h2>References</h2>
-      <div class="refs">
-        <div class="ref">
-          <strong>Asst. Prof. Derya Deniz</strong>
-          <span>Department of Civil Engineering</span>
-          <span>Özyeğin University, Istanbul, Türkiye</span>
-          <a href="mailto:derya.deniz@ozyegin.edu.tr">derya.deniz@ozyegin.edu.tr</a>
-        </div>
-        <div class="ref">
-          <strong>Prof. Nader Fanaie</strong>
-          <span>Department of Civil Engineering</span>
-          <span>K. N. Toosi University of Technology, Tehran, Iran</span>
-          <a href="mailto:fanaie@kntu.ac.ir">fanaie@kntu.ac.ir</a>
-        </div>
-        <div class="ref">
-          <strong>Assoc. Prof. Mohtasham Mohebbi</strong>
-          <span>Department of Civil Engineering</span>
-          <span>University of Mohaghegh Ardabili, Ardabil, Iran</span>
-          <a href="mailto:mohebbi@uma.ac.ir">mohebbi@uma.ac.ir</a>
-        </div>
-      </div>
-    </section>
-
-    <footer>
-      <span>© <span id="year">2026</span> Ramin Sheikhi Garjan</span>
-      <span>Last updated September 2026</span>
-    </footer>
-  </main>
-</div>
-
-<script>
-/* Seismogram trace: P-wave onset, stronger S-wave arrival, exponential coda decay */
-(function(){
-  var seed = 7;
-  function rnd(){ seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
-  var comps = [];
-  for (var i = 0; i < 9; i++) comps.push({f: 0.08 + rnd()*0.5, p: rnd()*6.283, a: 0.4 + rnd()*0.6});
-  var tP = 170, tS = 330, d = "";
-  for (var x = 0; x <= 1000; x += 2){
-    var env = 0.6;
-    if (x > tP) env += 7 * (1 - Math.exp(-(x - tP)/12)) * Math.exp(-(x - tP)/220);
-    if (x > tS) env += 38 * (1 - Math.exp(-(x - tS)/8)) * Math.exp(-(x - tS)/140);
-    var s = 0; for (var k = 0; k < comps.length; k++) s += comps[k].a * Math.sin(comps[k].f*x + comps[k].p);
-    s = s / 3 + (rnd() - 0.5) * 0.5;
-    var y = Math.max(2, Math.min(94, 48 + env * s));
-    d += (x ? "L" : "M") + x + " " + y.toFixed(1);
-  }
-  var wave = document.getElementById("wave");
-  wave.setAttribute("d", d);
-  document.getElementById("markP").setAttribute("d", "M"+tP+" 6V90");
-  document.getElementById("markS").setAttribute("d", "M"+tS+" 6V90");
-  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (!reduce && wave.getTotalLength){
-    var L = wave.getTotalLength();
-    wave.style.strokeDasharray = L;
-    wave.style.strokeDashoffset = L;
-    wave.getBoundingClientRect();
-    wave.style.transition = "stroke-dashoffset 2.6s cubic-bezier(.3,.1,.3,1)";
-    requestAnimationFrame(function(){ wave.style.strokeDashoffset = 0; });
-  }
-})();
-
-/* Highlight the current section in the navigation */
-(function(){
-  var links = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
-  var map = {};
-  links.forEach(function(a){ map[a.getAttribute("href").slice(1)] = a; });
-  document.getElementById("year").textContent = new Date().getFullYear();
-  if (!("IntersectionObserver" in window)) return;
-  var io = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if (e.isIntersecting){
-        links.forEach(function(a){ a.classList.remove("active"); });
-        var a = map[e.target.id];
-        if (a){
-          a.classList.add("active");
-          if (window.innerWidth <= 900){
-            var ul = a.closest("ul");
-            if (ul) ul.scrollTo({left: a.offsetLeft - ul.clientWidth/2 + a.offsetWidth/2, behavior: "smooth"});
-          }
-        }
-      }
-    });
-  }, {rootMargin: "-20% 0px -70% 0px"});
-  Object.keys(map).forEach(function(id){ var el = document.getElementById(id); if (el) io.observe(el); });
-})();
-</script>
+  <script src="js/script.js"></script>
 </body>
 </html>
