@@ -260,6 +260,8 @@ button { font: inherit; cursor: pointer; border: none; background: none; color: 
 
 .blob {
   position: absolute;
+  inset: 0;
+  margin: auto;
   width: 85%;
   height: 85%;
   background: linear-gradient(135deg, var(--primary), var(--primary-2));
