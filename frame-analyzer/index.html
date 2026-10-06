@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-N8PHSGN9');</script>
+  <!-- End Google Tag Manager -->
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X739RKDZPJ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-X739RKDZPJ');
+  </script>
+
+  <script>/* follow the light/dark theme chosen on the homepage */
+    try { const t = localStorage.getItem("theme"); if (t) document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Frame Analyzer — Ramin Sheikhi</title>
+  <meta name="description" content="Modal, pushover and time-history analysis of 2D and 3D moment frames in the browser.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N8PHSGN9"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+  <div class="app">
+    <aside class="sidebar" id="sidebar" aria-label="Model definition">
+      <div class="sidebar-head">
+        <h2>Model</h2>
+        <div class="file-actions">
+          <button type="button" class="btn small ghost" id="btn-save" title="Save the model to a JSON file">Save</button>
+          <button type="button" class="btn small ghost" id="btn-open" title="Open a model JSON file">Open</button>
+          <button type="button" class="btn small ghost" id="btn-reset" title="Restore the default model">Reset</button>
+          <input type="file" id="file-open" accept=".json,application/json" hidden>
+        </div>
+      </div>
+      <div id="model-form"></div>
+    </aside>
+
+    <main class="main">
+      <header class="main-head">
+        <button type="button" class="btn small ghost menu-btn" id="btn-menu" aria-controls="sidebar">☰ Model</button>
+        <div>
+          <h1 id="app-title">2D Frame Analyzer</h1>
+          <p class="caption">Units: kN, m, s, t. Section dimensions in mm, stresses in MPa.
+            <a href="docs.html" target="_blank" rel="noopener">Documentation</a>
+            <a href="../">← Ramin Sheikhi</a></p>
+        </div>
+      </header>
+
+      <nav class="tabs" role="tablist">
+        <button type="button" role="tab" class="tab active" data-tab="model">Model</button>
+        <button type="button" role="tab" class="tab" data-tab="modal">Modal</button>
+        <button type="button" role="tab" class="tab" data-tab="po">Pushover</button>
+        <button type="button" role="tab" class="tab" data-tab="th">Time history</button>
+      </nav>
+
+      <section class="tab-panel active" id="tab-model" role="tabpanel"></section>
+      <section class="tab-panel" id="tab-modal" role="tabpanel"></section>
+      <section class="tab-panel" id="tab-po" role="tabpanel"></section>
+      <section class="tab-panel" id="tab-th" role="tabpanel"></section>
+    </main>
+  </div>
+
+  <script src="js/linalg.js"></script>
+  <script src="js/materials.js"></script>
+  <script src="js/sections.js"></script>
+  <script src="js/elements.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/records.js"></script>
+  <script src="js/plots.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

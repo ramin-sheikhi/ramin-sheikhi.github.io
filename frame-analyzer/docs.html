@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-N8PHSGN9');</script>
+  <!-- End Google Tag Manager -->
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X739RKDZPJ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-X739RKDZPJ');
+  </script>
+
+  <script>/* follow the light/dark theme chosen on the homepage */
+    try { const t = localStorage.getItem("theme"); if (t) document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Frame Analyzer Documentation — Ramin Sheikhi</title>
+  <meta name="description" content="User guide and technical reference for the browser-based 2D/3D frame analyzer (HTML + CSS + JavaScript port of the OpenSeesPy frame analyzer).">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .doc { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: 100vh; }
+    .toc { position: sticky; top: 0; height: 100vh; overflow-y: auto; background: var(--sidebar); border-right: 1px solid var(--line); padding: 22px 16px; font-size: 0.9rem; }
+    .toc a { display: block; color: var(--ink2); text-decoration: none; padding: 3px 6px; border-radius: 5px; }
+    .toc a:hover { background: var(--panel); color: var(--ink); }
+    .toc a.sub { padding-left: 20px; font-size: 0.85rem; }
+    .toc .back { margin-bottom: 14px; font-weight: 600; color: var(--accent); }
+    article { max-width: 900px; padding: 32px 40px 80px; line-height: 1.6; }
+    article h1 { font-size: 2rem; margin-bottom: 6px; }
+    article h2 { font-size: 1.4rem; margin: 44px 0 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+    article h3 { font-size: 1.1rem; margin: 26px 0 8px; }
+    article p, article li { color: var(--ink); }
+    article code { font: 0.88em var(--mono); background: var(--sidebar); border: 1px solid var(--line); padding: 1px 5px; border-radius: 4px; }
+    article pre { font: 12.5px/1.55 var(--mono); background: var(--sidebar); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; overflow-x: auto; }
+    article pre code { background: none; border: none; padding: 0; }
+    article table { border-collapse: collapse; width: 100%; font-size: 0.88rem; margin: 10px 0 18px; }
+    article th, article td { border: 1px solid var(--line); padding: 6px 9px; text-align: left; vertical-align: top; }
+    article th { background: var(--sidebar); font-weight: 600; }
+    article td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .lead { font-size: 1.05rem; color: var(--ink2); }
+    .callout { border-left: 3px solid var(--accent); background: var(--info-bg); color: var(--info-ink); padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 14px 0; }
+    .callout.warn { border-color: var(--c4); background: var(--warn-bg); color: var(--warn-ink); }
+    .tag { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 1px 7px; border-radius: 10px; }
+    .tag.exact { background: var(--ok-bg); color: var(--ok-ink); }
+    .tag.approx { background: var(--warn-bg); color: var(--warn-ink); }
+    kbd { font: 0.85em var(--mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 4px; }
+    @media (max-width: 860px) {
+      .doc { grid-template-columns: minmax(0, 1fr); }
+      .toc { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--line); }
+      article { padding: 20px 16px 60px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N8PHSGN9"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+<div class="doc">
+<nav class="toc" aria-label="Contents">
+  <a class="back" href="index.html">← Open the analyzer</a>
+  <a href="../" style="margin-bottom:12px">← Ramin Sheikhi homepage</a>
+  <a href="#overview">1. Overview</a>
+  <a href="#quickstart">2. Quick start</a>
+  <a href="#interface">3. Using the interface</a>
+  <a class="sub" href="#sidebar">Model sidebar</a>
+  <a class="sub" href="#tab-model">Model tab</a>
+  <a class="sub" href="#tab-modal">Modal tab</a>
+  <a class="sub" href="#tab-pushover">Pushover tab</a>
+  <a class="sub" href="#tab-th">Time-history tab</a>
+  <a class="sub" href="#files">Saving and opening models</a>
+  <a href="#conventions">4. Units and axes</a>
+  <a href="#model">5. The structural model</a>
+  <a class="sub" href="#geometry">Geometry and numbering</a>
+  <a class="sub" href="#constraints">Supports and constraints</a>
+  <a class="sub" href="#elements">Elements and transformations</a>
+  <a class="sub" href="#sections">Sections</a>
+  <a class="sub" href="#materials">Materials</a>
+  <a class="sub" href="#connections">Beam–column connections</a>
+  <a class="sub" href="#loads">Loads and masses</a>
+  <a href="#analyses">6. Analyses</a>
+  <a class="sub" href="#gravity">Gravity</a>
+  <a class="sub" href="#modal">Modal</a>
+  <a class="sub" href="#pushover">Pushover</a>
+  <a class="sub" href="#timehistory">Time history</a>
+  <a class="sub" href="#solvers">Solution algorithms</a>
+  <a href="#outputs">7. Results and CSV files</a>
+  <a href="#errors">8. Errors and troubleshooting</a>
+  <a href="#validation">9. Validation against OpenSees</a>
+  <a href="#differences">10. Differences from the Python version</a>
+  <a href="#performance">11. Performance and limits</a>
+  <a href="#architecture">12. Architecture and files</a>
+  <a href="#api">13. Scripting the engine</a>
+  <a href="#extending">14. Extending</a>
+</nav>
+
+<article>
+<h1>Frame Analyzer documentation</h1>
+<p class="lead">This app runs modal, pushover and time-history analyses of 2D and 3D moment frames entirely in the
+web browser. It is the HTML + CSS + JavaScript version of the OpenSeesPy / Streamlit <em>Frame Analyzer</em>. It has
+the same inputs, the same model and the same outputs, but needs no Python, no installation and no server.</p>
+
+<!-- ================================================================== -->
+<h2 id="overview">1. Overview</h2>
+<p>The app has two parts:</p>
+<ul>
+  <li>A <strong>user interface</strong> (<code>index.html</code>, <code>css/style.css</code>, <code>js/app.js</code>, <code>js/plots.js</code>).
+    You define the frame, run analyses and view and download the results.</li>
+  <li>A <strong>finite element engine</strong> written in JavaScript (<code>js/engine.js</code> and the modules it uses).
+    It re-implements the parts of OpenSees the frame model needs: force-based, displacement-based and elastic
+    beam-columns, fiber sections, the uniaxial material models, Linear/P-Delta transformations, rigid diaphragms,
+    zero-length joint springs, Newton-type solvers, displacement control, Newmark integration, Rayleigh damping and
+    eigenvalue analysis.</li>
+</ul>
+<p>The engine follows the OpenSees formulations closely. The test suite in <a href="#validation">section 9</a>
+compares it with OpenSeesPy, and for most models periods, pushover curves and time histories agree to machine
+precision.</p>
+
+<h3>Features</h3>
+<ul>
+  <li>2D frames (X–Y plane) and 3D frames (X–Y plan, Z vertical), 1–30 stories, 1–20 bays in each direction.</li>
+  <li>Element types: <code>forceBeamColumn</code>, <code>dispBeamColumn</code>, <code>elasticBeamColumn</code>; Lobatto, Legendre, Radau and Newton-Cotes integration with 2–10 points.</li>
+  <li>Sections: RC rectangle (fiber, confined core + cover + bars), steel I-section (fiber), elastic rectangle.</li>
+  <li>13 uniaxial materials, plus a <em>Custom</em> entry that takes OpenSees-style arguments.</li>
+  <li>Rigid, pinned or semi-rigid beam–column joints (any spring material; stiffness given as <em>k</em> or as a fixity factor γ).</li>
+  <li>Rigid floor diaphragms, P-Delta for columns, gravity loads with automatic seismic mass.</li>
+  <li>Modal analysis with participation factors and mass ratios; pushover (triangular, uniform or first-mode pattern);
+      time history using an uploaded record (PEER AT2, single column, time–acc), a synthetic record or a sine wave.</li>
+  <li>Interactive SVG charts with hover read-out. 3D drawings rotate when dragged. Results download as CSV.</li>
+  <li>Engine messages, a likely cause and a JavaScript stack trace are shown when an analysis fails.</li>
+  <li>Works offline from a local folder (<code>file://</code>), with light and dark themes and a phone-width layout.</li>
+</ul>
+
+<h3>Requirements</h3>
+<p>Any current desktop or mobile browser (Chrome, Edge, Firefox or Safari from 2022 or later). Nothing to install
+and no internet connection needed: the app uses no external libraries, fonts or CDNs.</p>
+
+<!-- ================================================================== -->
+<h2 id="quickstart">2. Quick start</h2>
+<ol>
+  <li>Open <code>web/index.html</code> in your browser (double-click it), or serve the <code>web</code> folder from any static web server.</li>
+  <li>The default model (3-story, 2-bay RC frame with fiber sections) is built and its gravity analysis runs at once.
+    The <strong>Model</strong> tab shows the frame, the section properties and the cross-sections.</li>
+  <li>Change any input in the left-hand <strong>Model</strong> panel. About half a second after you stop typing, the model is rebuilt and gravity re-run.</li>
+  <li>Open <strong>Modal</strong> and press <em>Run modal analysis</em> to get periods, mass participation and mode shapes.</li>
+  <li>Open <strong>Pushover</strong>, choose the load pattern and target drift, then press <em>Run pushover</em>. A progress bar
+    appears, and <em>Stop</em> ends the run early but keeps the results so far.</li>
+  <li>Open <strong>Time history</strong>, pick or upload a ground motion and press <em>Run time history</em>.</li>
+  <li>Use <em>Download CSV</em> under each result to export the numbers, and <em>Save</em> at the top of the panel to keep the model as a JSON file.</li>
+</ol>
+<div class="callout">Your inputs are also kept in the browser's local storage, so reloading the page restores the last
+model. <em>Reset</em> restores the defaults.</div>
+
+<!-- ================================================================== -->
+<h2 id="interface">3. Using the interface</h2>
+
+<h3 id="sidebar">Model sidebar</h3>
+<p>At the top, <strong>Model type</strong> switches between a 2D and a 3D frame. Switching clears results from the
+other model type. The sidebar has six sections:</p>
+<table>
+  <tr><th>Section</th><th>Inputs</th></tr>
+  <tr><td>1 · Geometry</td><td>Stories; bays and bay width (in X, plus Y for 3D); first-story and typical story height;
+    <em>Rigid floor diaphragm</em> (equalDOF in 2D, rigidDiaphragm in 3D); <em>P-Delta for columns</em>.</td></tr>
+  <tr><td>2 · Element</td><td>Element type; integration rule and number of integration points (not used by the elastic element).</td></tr>
+  <tr><td>3 · Column section<br>4 · Beam section</td><td>Section type and dimensions (mm). For RC: cover to the bar centre, bar
+    diameter, bars at top / bottom / per side, concrete material, core confinement factor K and core ultimate strain εcu
+    (for materials that can be confined), cracked-stiffness factor (used only by the elastic element) and reinforcing steel.
+    For the I-section: d, bf, tw, tf and the steel material. In 3D the column depth h is along global X; the beam section is
+    used for beams in both directions with h vertical.</td></tr>
+  <tr><td>5 · Beam–column connection</td><td>Rigid, Pinned or Semi-rigid. For semi-rigid joints choose a spring material
+    (moments in kN·m, rotations in rad). Give its initial stiffness either as <em>k</em> (kN·m/rad) or as the fixity factor
+    γ = 1 / (1 + 3EI/(kL)). The caption shows k, γ and kL/EI.</td></tr>
+  <tr><td>6 · Loads &amp; mass</td><td>Uniform load on floor beams and on roof beams (kN/m, applied to every beam). Seismic mass
+    is either <em>from gravity loads</em> (w × total beam length per floor / g) or entered manually (t per floor).</td></tr>
+</table>
+<p>Material forms show each material's parameters with units. Stresses and moduli are in MPa for sections and in
+kN·m (or kN·m/rad) for joint springs; strains and rotations are dimensionless or in rad. HystereticSM has an envelope
+table where you can add or remove points (2–7). By default the negative envelope mirrors the positive one. Hover over a
+<span class="help" style="display:inline-flex">?</span> icon for help. An invalid number turns the field red and is ignored
+until it is corrected.</p>
+
+<h3 id="tab-model">Model tab</h3>
+<p>Shows the frame drawing, a table of section properties (E, A, I, plus I weak and J in 3D, bars, As and ρ), the total
+seismic weight and height, counts of nodes, columns, beams, joint springs and equations, and the engine messages from
+the gravity analysis. Below are the column and beam cross-sections, drawn to scale with dimensions: confined core
+dark grey, cover light grey, bars orange. Pinned joints appear as hollow circles at the beam ends and semi-rigid joints
+as filled circles. In 3D, drag the drawing to rotate it and double-click to reset the view.</p>
+<p>If the model cannot be built, or gravity does not converge, the tab shows the error, a likely cause, the engine
+messages and the stack trace (see <a href="#errors">section 8</a>).</p>
+
+<h3 id="tab-modal">Modal tab</h3>
+<p>Enter the number of modes (up to the number of dynamic degrees of freedom; the help icon shows the maximum) and run.
+The table lists for each mode: period T, frequency f, circular frequency ω, and for each lateral direction the participation
+factor Γ, the effective mass ratio and the cumulative mass ratio. Mode shapes are drawn for the first 12 modes. If the
+tangent stiffness after gravity has negative eigenvalues, a warning explains that the structure is unstable under its
+own gravity loads.</p>
+
+<h3 id="tab-pushover">Pushover tab</h3>
+<p>Inputs: lateral load pattern (<em>Triangular (inverted)</em> ∝ m·h, <em>Uniform</em> ∝ m, <em>First mode</em> ∝ m·φ of the
+mode with the largest participation in the chosen direction), direction (X or Y, 3D only), target roof drift (%) and number of
+steps. The results show the status, the engine messages, the maximum base shear, V/W, the final roof displacement, the
+pushover curve, the interstory-drift profile at the final step and the deformed shape with an adjustable scale.</p>
+
+<h3 id="tab-th">Time-history tab</h3>
+<p><strong>Ground motion</strong>, choose one of three sources:</p>
+<ul>
+  <li><em>Upload record</em>: PEER NGA <code>.AT2</code> files (NPTS and DT read from the header, old and new formats),
+    single-column files (enter dt) or two-column time–acceleration files. Commas, spaces and semicolons are accepted, and
+    lines starting with <code>#</code> are ignored. Units g, m/s² or cm/s².</li>
+  <li><em>Synthetic</em>: Kanai–Tajimi filtered white noise (ground frequency fg, damping ζg) with a trapezoidal envelope
+    (quadratic build-up to 10% of the duration, strong motion to 50%, exponential decay), scaled to the PGA. The random seed
+    makes it repeatable.</li>
+  <li><em>Sine wave</em>: amplitude, period, duration (dt = 0.005 s).</li>
+</ul>
+<p>The record preview shows the PGA, dt and number of points. <strong>Analysis settings</strong>: scale factor, damping ratio ζ,
+the two modes i, j used for Rayleigh damping, analysis time step, free-vibration time added after the record, and the
+excitation direction (3D). Results: status, Rayleigh coefficients, peak roof displacement (with its time), peak base shear,
+V/W, maximum interstory drift, roof displacement and base shear histories, the base-shear–roof-displacement loop and the
+peak drift profile.</p>
+
+<h3 id="files">Saving and opening models</h3>
+<p><em>Save</em> downloads <code>frame-model.json</code> with every input, including the values entered for each material
+type. <em>Open</em> loads such a file. Older or hand-edited files work too, because missing fields are filled with the
+defaults. Results are not stored in the file; re-run the analyses after opening.</p>
+
+<!-- ================================================================== -->
+<h2 id="conventions">4. Units and axes</h2>
+<table>
+  <tr><th>Quantity</th><th>Unit</th></tr>
+  <tr><td>Force, length, time, mass</td><td>kN, m, s, t (tonne = kN·s²/m)</td></tr>
+  <tr><td>Section dimensions</td><td>mm (converted to m internally)</td></tr>
+  <tr><td>Stresses and moduli in section materials</td><td>MPa (× 1000 → kPa internally)</td></tr>
+  <tr><td>Joint spring moments / stiffness</td><td>kN·m, kN·m/rad</td></tr>
+  <tr><td>Custom material arguments</td><td>model units: kN, m, kPa (MPa × 1000), kN·m for springs</td></tr>
+  <tr><td>Accelerations of records</td><td>g in the app (uploaded files may be g, m/s², cm/s²); g = 9.81 m/s²</td></tr>
+</table>
+<p><strong>2D</strong>: the frame lies in the X–Y plane with Y vertical; 3 dofs per node (ux, uy, rz).
+<strong>3D</strong>: X and Y in plan, Z vertical; 6 dofs per node. Column depth h is along global X; beam depth h is
+vertical, so gravity bends beams about their strong axis. Drifts and displacements are relative to the ground.</p>
+
+<!-- ================================================================== -->
+<h2 id="model">5. The structural model</h2>
+
+<h3 id="geometry">Geometry and numbering</h3>
+<p>Grid lines are at <code>x = j·bay</code> and (3D) <code>y = k·bay_y</code>. Level 0 is the base; level 1 is at h1 and higher levels are spaced h apart.
+Node tags follow the Python version: <code>tag = floor·10000 + iy·100 + ix + 1</code>. Rigid-diaphragm master nodes (3D) are
+<code>2000000 + floor</code>, at the centre of the plan; auxiliary hinge nodes are numbered from <code>1000001</code>. Columns are
+created story by story, followed by beams floor by floor (X beams, then Y beams).</p>
+
+<h3 id="constraints">Supports and constraints</h3>
+<ul>
+  <li>All base nodes are fully fixed.</li>
+  <li><em>Rigid diaphragm, 2D</em>: the horizontal displacement of every floor node equals that of the first node of the floor (equalDOF, dof 1).</li>
+  <li><em>Rigid diaphragm, 3D</em>: each floor has a master node with free ux, uy, rz (uz, rx, ry fixed); the floor nodes follow the
+    rigid in-plane motion of the master (rigidDiaphragm perpendicular to Z): <code>ux = uxm − (y − ym)·rz</code>,
+    <code>uy = uym + (x − xm)·rz</code>, <code>rz = rzm</code>.</li>
+</ul>
+<p>The engine imposes constraints exactly, by transformation, like the OpenSees <em>Transformation</em> constraint handler.
+Each node dof is written as a linear combination of independent unknowns. The masses therefore transform as TᵀMT, so a
+3D diaphragm gets the correct rotational inertia. The unknowns are renumbered with reverse Cuthill–McKee to keep the
+stiffness profile small.</p>
+
+<h3 id="elements">Elements and transformations</h3>
+<table>
+  <tr><th>Element</th><th>Formulation</th></tr>
+  <tr><td>elasticBeamColumn</td><td>Closed-form stiffness with E, A, I (and G, J, I weak in 3D) from the section; RC sections use the
+    initial concrete modulus with I and J × the cracked-stiffness factor.</td></tr>
+  <tr><td>dispBeamColumn</td><td>Cubic Hermite displacement field; section deformations ε = v₀/L, κ = [(6ξ−4)v₁ + (6ξ−2)v₂]/L; stiffness and
+    forces integrated over the integration points; uniform loads as fixed-end forces.</td></tr>
+  <tr><td>forceBeamColumn</td><td>Flexibility formulation with exact force interpolation (axial constant, moments linear plus the particular
+    solution of the uniform load). Element state determination as in OpenSees: Newton iterations with the section flexibility,
+    then initial-flexibility iterations, then initial-then-Newton, then subdividing the deformation increment (energy tolerance 10⁻¹², 10 iterations).</td></tr>
+</table>
+<p>Coordinate transformations: <em>Linear</em> for beams and either <em>Linear</em> or <em>PDelta</em> for columns (the
+P-Delta option). P-Delta adds the geometric stiffness (N/L) in both transverse directions and the matching forces. In 3D
+the local axes follow OpenSees (y = vecxz × x, z = x × y):</p>
+<table>
+  <tr><th>Member</th><th>vecxz</th><th>Local y (depth h)</th></tr>
+  <tr><td>Columns</td><td>(0, 1, 0)</td><td>global X</td></tr>
+  <tr><td>Beams along X</td><td>(0, −1, 0)</td><td>global Z</td></tr>
+  <tr><td>Beams along Y</td><td>(1, 0, 0)</td><td>global Z</td></tr>
+</table>
+<p>The beam integration points are computed numerically: Legendre (Gauss) roots of Pₙ; Lobatto end points plus roots of
+P′ₙ₋₁; Radau left end point plus roots of Pₙ₋₁ + Pₙ; Newton-Cotes evenly spaced. Weights are interpolatory (exact for
+polynomials of degree n − 1).</p>
+
+<h3 id="sections">Sections</h3>
+<table>
+  <tr><th>Section</th><th>Fiber layout (2D / 3D)</th><th>Notes</th></tr>
+  <tr><td>RC rectangle</td><td>Core 16 × 1 / 16 × 16; cover strips 16 × 1 on the two b-faces and 2 × 1 / 2 × 16 on the two h-faces; one fiber per bar</td>
+    <td>Bars: n_top on the top face, n_bot on the bottom face, n_side per side face, centred at the cover distance. The core uses the
+    confined concrete (fc·K, εc0·K, εcu = core εcu, fcu = 0.2·fc,core for Kent–Park materials).</td></tr>
+  <tr><td>Steel I-section</td><td>Flanges 4 × 1 / 4 × 8 each, web 16 × 1 / 16 × 2</td><td>Single steel material.</td></tr>
+  <tr><td>Elastic rectangle</td><td>–</td><td>EA, EI (and EI weak, GJ in 3D); ν = 0.2.</td></tr>
+</table>
+<p>Fiber strains are ε = ε₀ − y·κz + z·κy, measured from the geometric centroid of the fibers (as OpenSees does). In 3D,
+torsion is elastic with GJ (J from the rectangle formula or the open-section formula of the I-shape; ν = 0.2 for RC, 0.3 for steel).</p>
+
+<h3 id="materials">Materials</h3>
+<p>Compression is negative inside the engine. Concrete strengths and strains are entered as positive numbers in the forms.
+The <em>fidelity</em> column shows how closely the JavaScript model reproduces OpenSees in the strain-history tests of
+<a href="#validation">section 9</a>.</p>
+<table>
+  <tr><th>Material</th><th>Offered for</th><th>Parameters (form)</th><th>Fidelity</th></tr>
+  <tr><td>Elastic</td><td>steel, concrete, spring</td><td>E</td><td><span class="tag exact">exact</span></td></tr>
+  <tr><td>ElasticPP</td><td>steel, spring</td><td>E, εy</td><td><span class="tag exact">exact</span></td></tr>
+  <tr><td>ENT</td><td>concrete</td><td>E (no tension)</td><td><span class="tag exact">exact</span></td></tr>
+  <tr><td>Steel01</td><td>steel, spring</td><td>fy, E0, b</td><td><span class="tag exact">exact</span></td></tr>
+  <tr><td>Steel02</td><td>steel, spring</td><td>fy, E0, b, R0, cR1, cR2</td><td><span class="tag exact">exact</span></td></tr>
+  <tr><td>SteelMPF</td><td>steel, spring</td><td>fy+, |fy−|, E0, b+, b−, R0, cR1, cR2</td><td><span class="tag exact">exact</span> in the tests (Menegotto–Pinto with asymmetric yield)</td></tr>
+  <tr><td>ReinforcingSteel</td><td>steel</td><td>fy, fu, Es, Esh, εsh, εult</td><td><span class="tag approx">monotonic exact, cyclic approximate</span> Chang–Mander backbone with the OpenSees yield transition; cycles follow Masing rules (no buckling, fatigue or true-stress conversion).</td></tr>
+  <tr><td>Hysteretic</td><td>steel, spring</td><td>3-point symmetric envelope, pinchX, pinchY, damage1, damage2, β</td><td><span class="tag exact">exact</span></td></tr>
+  <tr><td>HystereticSM</td><td>steel, spring</td><td>2–7 point envelope (positive, optional negative), pinching, damage, β</td><td><span class="tag exact">exact</span></td></tr>
+  <tr><td>Concrete01</td><td>concrete</td><td>f′c, εc0, fcu, εcu</td><td><span class="tag exact">exact</span></td></tr>
+  <tr><td>Concrete02</td><td>concrete</td><td>f′c, εc0, fcu, εcu, λ, ft, Ets</td><td><span class="tag exact">exact</span></td></tr>
+  <tr><td>Concrete04</td><td>concrete</td><td>f′c, εc0, εcu, Ec, ft, εt, β</td><td><span class="tag exact">exact</span></td></tr>
+  <tr><td>Concrete07</td><td>concrete</td><td>f′c, εc0, Ec, ft, εt, x⁺, x⁻, r</td><td><span class="tag approx">envelope exact, cyclic approximate</span> Chang–Mander (Tsai) envelopes; plastic strain from the Chang–Mander secant rule; linear unloading/reloading branches.</td></tr>
+  <tr><td>Custom</td><td>all</td><td>material name, OpenSees argument list, E0 for elastic properties</td><td>any material above, in OpenSees argument order</td></tr>
+</table>
+<p><strong>Custom material.</strong> Type the OpenSees material name and the arguments that follow the tag, in model units
+(kN, m: stresses in kPa = MPa × 1000; spring moments in kN·m). Supported names and argument lists:</p>
+<pre><code>Elastic E
+ENT E
+ElasticPP E epsyP &lt;epsyN eps0&gt;
+Steel01 Fy E0 b &lt;a1 a2 a3 a4&gt;
+Steel02 Fy E0 b &lt;R0 cR1 cR2 &lt;a1 a2 a3 a4 sigInit&gt;&gt;
+SteelMPF fyp fyn E0 bp bn R0 cR1 cR2 &lt;a1 a2 a3 a4&gt;
+ReinforcingSteel fy fu Es Esh esh eult
+Hysteretic s1p e1p s2p e2p &lt;s3p e3p&gt; s1n e1n s2n e2n &lt;s3n e3n&gt; pinchX pinchY damage1 damage2 &lt;beta&gt;
+HystereticSM -posEnv F1 e1 ... -negEnv F1 e1 ... -pinch px py -damage d1 d2 -beta b
+Concrete01 fpc epsc0 fpcu epscu
+Concrete02 fpc epsc0 fpcu epscu lambda ft Ets
+Concrete04 fc ec ecu Ec &lt;fct et &lt;beta&gt;&gt;
+Concrete07 fc ec Ec ft et xp xn r</code></pre>
+<p>Custom concrete is not confined automatically (the core uses the same material as the cover).</p>
+
+<h3 id="connections">Beam–column connections</h3>
+<p>For pinned and semi-rigid joints an auxiliary node is created at each beam end, at the same position as the column node.
+It shares every unknown with the column node except the beam's bending rotation (rz in 2D; ry for X beams and rx for Y beams
+in 3D). With a <em>pinned</em> joint that rotation is free, so no moment is transferred. With a <em>semi-rigid</em> joint a
+zero-length rotational spring with the chosen material connects the two rotations. Torsion and weak-axis bending stay
+continuous. The Python version used stiff penalty springs for the tied dofs; the exact tie here gives the same results without
+penalty error. As in OpenSees, joint springs are left out of the Rayleigh damping matrix.</p>
+
+<h3 id="loads">Loads and masses</h3>
+<p>Every beam carries a uniform load in its local −y direction (downwards): w_floor on floors, w_roof on the roof. Each floor's mass is
+split equally between its grid nodes and assigned to all translational dofs. With <em>From gravity loads</em> the mass per floor is
+w × L / g, where L is the total beam length of a floor (n_bays·bay in 2D; n_x·bay_x·(n_y+1) + n_y·bay_y·(n_x+1) in 3D).</p>
+
+<!-- ================================================================== -->
+<h2 id="analyses">6. Analyses</h2>
+
+<h3 id="gravity">Gravity</h3>
+<p>Every model build applies the beam loads with load control in 10 steps of 0.1, using Newton iterations and a
+displacement-increment norm test (tolerance 10⁻⁸, 50 iterations). The loads are then held constant and the time is reset to 0,
+like OpenSees <code>loadConst -time 0</code>. Every analysis starts from this state on a freshly built model.</p>
+
+<h3 id="modal">Modal</h3>
+<p>Solves K φ = λ M φ with the tangent stiffness after gravity, so P-Delta and any cracking are included. The massless
+(rotational) dofs are condensed out exactly: the flexibility at the mass dofs is taken from the factorised K, and the reduced
+symmetric problem LᵀFL ψ = (1/λ) ψ (M = LLᵀ) is solved with Householder tridiagonalisation and implicit QL. Large models
+asking for few modes use subspace iteration instead. Modes are mass-normalised (φᵀMφ = 1). For each lateral direction d:
+L = Σ m·φd, Γ = L / Σ m·|φ|², mass ratio = L² / (Σ m·|φ|²) / M_total, summed over the grid-node masses (same as engine.py).
+The number of modes is limited to the number of mass dofs (2D rigid: ns·(1+nn); 2D flexible: 2·ns·nn; 3D rigid: ns·(3+nn);
+3D flexible: 3·ns·nn).</p>
+
+<h3 id="pushover">Pushover</h3>
+<p>Lateral nodal loads in the chosen direction are split equally between the nodes of each floor, with floor weights
+normalised to sum 1. Displacement control is applied at the roof control node (roof master in 3D rigid, otherwise the first
+roof node), with increment target/steps (tolerance 10⁻⁶, 100 iterations). If a step fails with every algorithm (see
+<a href="#solvers">solution algorithms</a>), it is retried as 10 sub-steps; if that also fails, the analysis stops and reports
+the drift reached. Base shear is the negative sum of the column resisting forces at the base nodes, the same as summing the
+OpenSees reactions.</p>
+
+<h3 id="timehistory">Time history</h3>
+<ul>
+  <li><strong>Damping</strong>: Rayleigh, αM = 2ζωiωj/(ωi+ωj), βK = 2ζ/(ωi+ωj) (or ζω and ζ/ω when i = j), using the
+    <em>committed</em> stiffness, like OpenSees <code>rayleigh(αM, 0, 0, βK)</code>. Periods come from an eigen analysis after gravity.</li>
+  <li><strong>Excitation</strong>: uniform base acceleration a_g(t) = scale · g · record(t) in the chosen direction,
+    P_eff = −M·r·a_g. The record is interpolated linearly and is zero after its last interval (OpenSees Path series).</li>
+  <li><strong>Integration</strong>: Newmark average acceleration (γ = 0.5, β = 0.25), displacement form with the OpenSees predictor;
+    tolerance 10⁻⁸, 50 iterations. A failed step is retried as 10 sub-steps of dt/10; if that fails, the analysis stops and reports the time reached.</li>
+  <li>Duration = record length + free-vibration time; number of steps = round(duration / dt).</li>
+</ul>
+
+<h3 id="solvers">Solution algorithms</h3>
+<p>Each step tries these algorithms in order, returning to the last converged state after each failure. The list follows
+<code>_try_step</code> in engine.py:</p>
+<ol>
+  <li><strong>Newton</strong>: tangent re-formed every iteration.</li>
+  <li><strong>ModifiedNewton</strong>: tangent from the first iteration of the step.</li>
+  <li><strong>NewtonLineSearch</strong>: interpolated (secant) line search, ratio 0.8.</li>
+  <li><strong>KrylovNewton</strong>: modified Newton with Krylov subspace acceleration (Carlson–Miller, subspace size 3).</li>
+  <li><strong>Newton with initial stiffness</strong>: replaces BFGS from the Python list.</li>
+</ol>
+<p>Linear systems use a symmetric skyline (profile) LDLᵀ solver after RCM renumbering; a zero pivot is reported as a singular
+stiffness matrix with the node and dof. Convergence uses the norm of the displacement increment (OpenSees NormDispIncr).</p>
+
+<!-- ================================================================== -->
+<h2 id="outputs">7. Results and CSV files</h2>
+<table>
+  <tr><th>File</th><th>Columns</th></tr>
+  <tr><td><code>modal.csv</code></td><td>Mode, T (s), f (Hz), omega (rad/s), and per direction Gamma, Mass ratio, Cumulative</td></tr>
+  <tr><td><code>pushover.csv</code></td><td>roof_disp_m, roof_drift_pct, base_shear_kN (one row per converged step)</td></tr>
+  <tr><td><code>time_history.csv</code></td><td>time_s, roof_disp_m, base_shear_kN, drift_story1 … drift_storyN (interstory drift ratios)</td></tr>
+  <tr><td><code>frame-model.json</code></td><td>The model inputs (see <a href="#files">Saving and opening models</a>)</td></tr>
+</table>
+<p>Displacements are relative to the ground and in the analysis direction; interstory drift = (u_i − u_{i−1}) / story height,
+using the floor reference nodes.</p>
+
+<!-- ================================================================== -->
+<h2 id="errors">8. Errors and troubleshooting</h2>
+<p>When an analysis fails, the app shows the error, a likely cause chosen from the messages, the engine messages (OpenSees-style
+warnings) and the JavaScript stack trace.</p>
+<table>
+  <tr><th>Message contains</th><th>Likely cause and fix</th></tr>
+  <tr><td>Invalid #args, invalid type, unknown material, envelope needs…</td><td>A material definition was rejected: check the
+    parameters; for a Custom material, the name and the number/order of the arguments.</td></tr>
+  <tr><td>Invalid section</td><td>Impossible section dimensions (e.g. 2·cover ≥ b, d ≤ 2·tf).</td></tr>
+  <tr><td>eigen analysis, NCV must be greater</td><td>More modes requested than dynamic dofs, or zero mass. Reduce the number of modes or Rayleigh mode j; check masses &gt; 0.</td></tr>
+  <tr><td>singular, zero pivot</td><td>Mechanism or zero stiffness: check dimensions, E, the connection type and the spring stiffness.</td></tr>
+  <tr><td>failed to converge, compatible element forces</td><td>Nonlinear solution did not converge: use a smaller dt or more pushover steps, a lower scale factor
+    or target drift, or try the elastic element first. If the elastic model runs, the cause is material softening (concrete crushing,
+    very low εcu, b = 0 for steel).</td></tr>
+</table>
+<h3>Other tips</h3>
+<ul>
+  <li><strong>Negative eigenvalues / very long periods</strong>: the gravity load exceeds the P-Delta buckling load (for example pinned beams with tall,
+    slender cantilever columns). Use stiffer columns, fixed joints or switch P-Delta off to compare.</li>
+  <li><strong>Brittle concrete tension</strong> (Concrete04 with εt ≈ ft/Ec) makes pushover curves jagged; this is real model behaviour and
+    appears in OpenSees too.</li>
+  <li><strong>The page is slow</strong>: big 3D fiber models are expensive (see <a href="#performance">section 11</a>). Use fewer integration
+    points, the dispBeamColumn element or an elastic model while exploring.</li>
+  <li><strong>Inputs reset after reopening the file</strong>: some browsers block local storage for <code>file://</code> pages; use <em>Save</em>/<em>Open</em>.</li>
+</ul>
+
+<!-- ================================================================== -->
+<h2 id="validation">9. Validation against OpenSees</h2>
+<p>The JavaScript engine was checked against OpenSeesPy 3.x running the original <code>engine.py</code> on the same models (3-story,
+2-bay frames with the default sections unless noted; sine record 0.3 g, T = 0.6 s, 5 s; ζ = 5%).</p>
+<table>
+  <tr><th>Model</th><th>T₁ (s) OpenSees / JS</th><th>Pushover V<sub>max</sub> (kN) OpenSees / JS</th><th>Time history peak roof (mm) OpenSees / JS</th></tr>
+  <tr><td>2D elastic</td><td class="n">0.5686 / 0.5686</td><td class="n">1174.64 / 1174.64</td><td class="n">231.58 / 231.58</td></tr>
+  <tr><td>2D force-based RC (Concrete02/Steel02)</td><td class="n">0.3494 / 0.3494</td><td class="n">320.24 / 320.24 ¹</td><td class="n">65.64 / 65.64</td></tr>
+  <tr><td>2D disp-based RC, Legendre 3</td><td class="n">0.3476 / 0.3476</td><td class="n">597.38 / 597.38</td><td>–</td></tr>
+  <tr><td>2D force-based steel I (Steel01), flexible floors, no P-Delta, Radau 4</td><td class="n">0.4367 / 0.4367</td><td class="n">1420.88 / 1420.88</td><td class="n">94.54 / 94.54</td></tr>
+  <tr><td>2D semi-rigid joints (Steel01 spring)</td><td class="n">0.6658 / 0.6658</td><td class="n">512.00 / 512.00</td><td class="n">108.44 / 108.44</td></tr>
+  <tr><td>2D pinned joints, force-based RC, 2 stories</td><td class="n">0.6333 / 0.6333</td><td class="n">94.03 / 94.03</td><td>–</td></tr>
+  <tr><td>2D Concrete01 + ElasticPP</td><td class="n">0.4208 / 0.4208</td><td class="n">285.43 / 285.43</td><td>–</td></tr>
+  <tr><td>2D Concrete04 + SteelMPF</td><td class="n">0.3782 / 0.3782</td><td class="n">299.54 / 300.65 ²</td><td>–</td></tr>
+  <tr><td>2D Concrete07 + ReinforcingSteel</td><td class="n">0.3695 / 0.3696</td><td class="n">303.28 / 303.27</td><td>–</td></tr>
+  <tr><td>2D Hysteretic / HystereticSM steel</td><td class="n">0.4382 / 0.4382</td><td class="n">1283.45 / 1283.45</td><td class="n">88.93 / 88.93</td></tr>
+  <tr><td>3D elastic, rigid diaphragm (6 modes)</td><td class="n">0.8681 / 0.8681</td><td class="n">1881.99 / 1881.99</td><td class="n">142.72 / 142.72</td></tr>
+  <tr><td>3D force-based RC, rigid diaphragm</td><td class="n">0.3753 / 0.3753</td><td class="n">631.08 / 631.08</td><td>–</td></tr>
+  <tr><td>3D disp-based steel, flexible floors, semi-rigid</td><td class="n">0.6235 / 0.6235</td><td class="n">902.86 / 902.86</td><td>–</td></tr>
+</table>
+<p>All modal periods and mass ratios (up to 6 modes) agree to the 4 decimals shown. Pushover curves and time histories agree to
+10⁻⁷ or better where the material models are exact.<br>
+¹ OpenSees loses convergence at 2.30% drift at a concrete crushing event. The curves are identical up to that point; the JS
+fallback algorithms continue to the 3% target (V<sub>max</sub> 324.9 kN).<br>
+² Brittle tension cracking happens at slightly different steps, so the curves jitter by about 1–2% after cracking.</p>
+<p>Uniaxial material strain-history tests give identical stresses for Steel01, Steel02, SteelMPF, ElasticPP, Hysteretic (with and without
+pinching and damage), HystereticSM, Concrete01, Concrete02 and Concrete04. Concrete07 and ReinforcingSteel match on the envelope; their cyclic
+branches are simplified (see the material table).</p>
+<p>On a large 3D RC model (10 stories, 4 × 4 bays) both programs stop the pushover at the same point (0.50% vs 0.53% drift), and
+the JavaScript engine runs at roughly the same speed as OpenSeesPy.</p>
+
+<!-- ================================================================== -->
+<h2 id="differences">10. Differences from the Python version</h2>
+<ul>
+  <li><strong>No OpenSees needed.</strong> The analysis engine is a JavaScript re-implementation; there is no Python, venv or Streamlit server.</li>
+  <li><strong>Exact constraints</strong> replace the penalty zero-length springs used at pinned/semi-rigid joints (differences of the order of the
+    10⁻⁴ penalty ratio).</li>
+  <li><strong>Algorithm list</strong>: BFGS is replaced by Newton with the initial stiffness.</li>
+  <li><strong>Eigen solver</strong>: exact condensation with a dense symmetric solver (or subspace iteration), so every mode up to the number of mass dofs
+    is available (the ARPACK limit of n − 1 no longer applies).</li>
+  <li><strong>ReinforcingSteel and Concrete07</strong> cyclic rules are simplified (envelopes exact).</li>
+  <li><strong>Custom materials</strong> accept only the material types implemented in the engine (listed above), not every OpenSees material.</li>
+  <li><strong>Synthetic records</strong> use a different random number generator (and power-of-two FFT), so the same seed gives a different
+    (statistically equivalent) record from the Python version.</li>
+  <li><strong>Drift profiles</strong> are drawn as true story profiles (each story's drift spans that story).</li>
+  <li><strong>Additions</strong>: Stop button with partial results, save/open model files, inputs remembered in the browser, rotatable 3D drawings,
+    chart hover read-out, dark mode, negative-eigenvalue warning, and Synthetic as the default ground motion (so the tab works without a file).</li>
+</ul>
+
+<!-- ================================================================== -->
+<h2 id="performance">11. Performance and limits</h2>
+<p>Run times depend on the number of fibers × integration points × elements. 2D models and elastic 3D models are fast
+(well under a second per pushover). A 3D RC fiber model has about 360 fibers per section, the same discretisation as the
+Python model. A 5-story 3 × 3-bay force-based RC model takes a few seconds to build and run gravity, and a pushover takes
+proportionally longer. Analyses run in short slices, so the page stays responsive and the Stop button works. For big models:</p>
+<ul>
+  <li>use dispBeamColumn with 3 Legendre points, or fewer integration points;</li>
+  <li>explore with elasticBeamColumn first;</li>
+  <li>use fewer pushover steps or a larger time step where the response allows it.</li>
+</ul>
+<p>Memory grows with the number of fibers (each fiber stores its own material state). The input limits match the Python
+version (30 stories, 20 × 20 bays), but the largest 3D fiber models are better run in OpenSees itself.</p>
+
+<!-- ================================================================== -->
+<h2 id="architecture">12. Architecture and files</h2>
+<pre><code>web/
+├── index.html        page skeleton (sidebar, tabs), loads the scripts
+├── docs.html         this documentation
+├── README.md         short introduction
+├── css/style.css     layout, components, light/dark theme
+└── js/
+    ├── linalg.js     skyline LDLᵀ solver, RCM ordering, dense symmetric eigen solver, small dense helpers
+    ├── materials.js  uniaxial material models + material catalogue (port of materials.py)
+    ├── sections.js   section properties, RC bar layout, elastic and fiber sections
+    ├── elements.js   integration rules, Linear/PDelta transformations, elastic/disp/force beam-columns, zero-length spring
+    ├── engine.js     domain (dofs, constraints, assembly, integrators, solvers, eigen), model builder, analyses (port of engine.py)
+    ├── records.js    ground-motion file parsing, sine and synthetic records
+    ├── plots.js      SVG line charts, 2D/3D frame drawings, cross-section drawings
+    └── app.js        user interface (port of app.py)</code></pre>
+<p>Each script is a plain browser script (no build step, no modules, so it works from <code>file://</code>) that attaches its API to the global
+<code>FA</code> object: <code>FA.linalg</code>, <code>FA.materials</code>, <code>FA.sections</code>, <code>FA.elements</code>, <code>FA.engine</code>,
+<code>FA.records</code>, <code>FA.plots</code>, <code>FA.app</code>. Scripts must load in the order shown in <code>index.html</code>.</p>
+<h3>Mapping from the Python files</h3>
+<table>
+  <tr><th>Python</th><th>JavaScript</th></tr>
+  <tr><td><code>materials.py</code> (catalogue, defaults, argument builders, confinement)</td><td><code>materials.js</code> part 2: <code>CATALOG</code>, <code>defaultSpec</code>, <code>opsArgs</code>, <code>initialE</code>, <code>confined</code></td></tr>
+  <tr><td>OpenSees uniaxial materials</td><td><code>materials.js</code> part 1 + <code>uniaxial(name, args)</code></td></tr>
+  <tr><td><code>engine.section_props</code>, <code>rc_bar_layout</code>, <code>rc_steel_summary</code>, <code>_section</code></td><td><code>sections.js</code></td></tr>
+  <tr><td><code>engine.build_model</code>, <code>_gravity</code></td><td><code>engine.createModel</code>, <code>buildModel</code>, <code>buildModelAsync</code></td></tr>
+  <tr><td><code>run_modal</code>, <code>run_pushover</code>, <code>run_time_history</code></td><td><code>runModal</code>, <code>runPushover</code>, <code>runTimeHistory</code> (the last two are async)</td></tr>
+  <tr><td><code>read_record</code>, <code>sine_record</code>, <code>synthetic_record</code></td><td><code>records.js</code></td></tr>
+  <tr><td><code>app.py</code> (Streamlit widgets, matplotlib figures)</td><td><code>app.js</code> + <code>plots.js</code></td></tr>
+</table>
+
+<!-- ================================================================== -->
+<h2 id="api">13. Scripting the engine</h2>
+<p>The engine has no dependency on the interface. Load the first six scripts on any page (or open the browser console on
+<code>index.html</code>) and call it directly. Parameters use the same keys as <code>build_model</code> in engine.py:</p>
+<pre><code>const M = FA.materials, E = FA.engine;
+const rc = (b, h) =&gt; ({
+  kind: 'RC rectangle (fiber)', b, h, cover: 40, d_bar: 20, n_top: 3, n_bot: 3, n_side: 0,
+  conc: M.defaultSpec('Concrete02', 'concrete'), K: 1.2, epscu_core: 0.015, crack: 0.5,
+  steel: M.defaultSpec('Steel02', 'steel'),
+});
+const p = {
+  dim: 2, n_stories: 3, n_bays: 2, bay: 5, n_bays_y: 0, bay_y: 5, h1: 3.5, h: 3.0,
+  rigid_diaphragm: true, pdelta: true, ele_type: 'forceBeamColumn', n_ip: 5, integ: 'Lobatto',
+  col_sec: rc(400, 400), beam_sec: rc(300, 500), conn: { type: 'Rigid' },
+  w_floor: 25, w_roof: 20, m_floor: 25 * 10 / 9.81, m_roof: 20 * 10 / 9.81,
+};
+
+let info = E.buildModel(p);                       // model + gravity
+const modes = E.runModal(info, 3);
+console.log(modes.map(m =&gt; m.T));                 // [0.3494, 0.1092, 0.0627]
+
+info = E.buildModel(p);                           // fresh model for each analysis
+const po = await E.runPushover(info, 'Triangular (inverted)', 3.0, 200, 1,
+  { progress: f =&gt; console.log(f), cancelled: () =&gt; false });
+console.log(Math.max(...po.V), po.status);
+
+info = E.buildModel(p);
+const [acc, dt] = FA.records.sineRecord(0.3, 0.6, 5, 0.005);
+const th = await E.runTimeHistory(info, acc, dt, 1.0, 0.05, 0.01, 1.0, [1, 3], 1);
+console.log(Math.max(...th.roof.map(Math.abs)));
+console.log(info.domain.logText());              // engine messages</code></pre>
+<p>Returned objects mirror the Python dictionaries: <code>runModal</code> → list of modes with <code>T, f, omega, gamma_x, ratio_x, cum_x, shape</code>;
+<code>runPushover</code> → <code>{roof, V, floors, drifts, H, W, status, final}</code>; <code>runTimeHistory</code> → <code>{t, roof, V, floors, drifts,
+status, rayleigh, periods, W}</code>. Lower-level objects (<code>info.domain</code>, its <code>nodeDisp(tag, dof)</code>, <code>eigen(n)</code>, elements and
+materials) are also available.</p>
+
+<!-- ================================================================== -->
+<h2 id="extending">14. Extending</h2>
+<h3>Adding a material</h3>
+<ol>
+  <li>In <code>materials.js</code> part 1, write a class with <code>setTrial(strain)</code> (sets <code>sig</code>, <code>tan</code> from the committed state),
+    <code>commit()</code>, <code>revert()</code> and an <code>E0</code> property.</li>
+  <li>Add a <code>case</code> for its OpenSees name in <code>uniaxial(name, args)</code> that checks the arguments and returns a function creating
+    new instances, and add the name to <code>IMPLEMENTED</code>.</li>
+  <li>To offer it in the forms, add an entry to <code>LIST</code> in part 2 with its families, parameters (name, label, kind, defaults per
+    family), the argument builder <code>args(v, scale)</code>, <code>E0(v)</code> and, for concrete, an optional <code>confine</code> function. The form,
+    model files and Custom material pick it up automatically.</li>
+</ol>
+<h3>Adding a section type</h3>
+<p>Extend <code>sectionProps</code> and <code>sectionMaker</code> in <code>sections.js</code>, the section form in <code>app.js</code>
+(<code>sectionInputs</code>, <code>secSpec</code>) and the drawing in <code>plots.section</code>.</p>
+<h3>Regression testing</h3>
+<p>The validation in section 9 builds the same parameter dictionaries in Python and JavaScript, runs <code>engine.py</code> with OpenSeesPy and the
+JavaScript engine in a headless browser, and compares periods, mass ratios, pushover curves, time histories and material stress histories.
+Repeat this comparison after any change to the engine.</p>
+
+<p class="note" style="margin-top:40px">Frame Analyzer: browser edition of the OpenSeesPy frame analyzer. OpenSees is developed at the
+University of California, Berkeley (PEER); this app re-implements a subset of its formulations and is not affiliated with the OpenSees project.</p>
+</article>
+</div>
+</body>
+</html>
