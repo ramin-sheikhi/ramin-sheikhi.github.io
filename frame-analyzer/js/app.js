@@ -27,7 +27,8 @@
     return {
       version: 1,
       dim: 2,
-      geo: { n_stories: 3, n_bays: 2, bay: 5, n_bays_y: 2, bay_y: 5, h1: 3.5, h: 3.0, rigid: true, pdelta: true },
+      geo: { n_stories: 3, n_bays: 2, bay: 5, n_bays_y: 2, bay_y: 5, h1: 3.5, h: 3.0, rigid: true, pdelta: true,
+             layout: 'regular', unequal: false, bays: [], bays_y: [], heights: [] },
       ele: { type: 'forceBeamColumn', integ: 'Lobatto', n_ip: 5 },
       col: sectionDefaults([400, 400, 300, 300]),
       beam: sectionDefaults([300, 500, 400, 200]),
@@ -38,6 +39,7 @@
       th: { src: 'Synthetic (filtered white noise)', fmt: 'PEER AT2', units: 'g', dt_in: 0.01,
             pga: 0.35, dur: 20, fg: 2.5, zg: 0.6, seed: 1, amp: 0.2, per: 0.5, sdur: 10,
             scale: 1, zeta: 0.05, modes: '1, 3', dt: 0.01, extra: 2, dir: 1 },
+      custom: { d2: null, d3: null },     // custom models (see editor.js), one per dimension
     };
   }
 
@@ -83,9 +85,28 @@
     return { kind: s.kind, d: s.d, bf: s.bf, tw: s.tw, tf: s.tf, steel: matSpec(s.steel, M.S) };
   }
 
+  const isCustom = () => ST.geo.layout === 'custom';
+  const curCustom = () => ST.custom['d' + ST.dim];
+
+  /** Keep the unequal-spacing lists as long as the bay / story counts. */
+  function syncLists() {
+    const g = ST.geo;
+    const fit = (list, n, def) => { list.length = Math.min(list.length, n); while (list.length < n) list.push(def(list.length)); };
+    fit(g.bays, g.n_bays, () => g.bay);
+    fit(g.bays_y, g.n_bays_y, () => g.bay_y);
+    fit(g.heights, g.n_stories, i => (i === 0 ? g.h1 : g.h));
+  }
+  const sum = a => a.reduce((x, y) => x + y, 0);
+  function spans() {             // [bays X, bays Y] in m
+    const g = ST.geo;
+    if (g.unequal) { syncLists(); return [g.bays.slice(), g.bays_y.slice()]; }
+    return [Array(g.n_bays).fill(g.bay), Array(g.n_bays_y).fill(g.bay_y)];
+  }
+
   function EI_L() {
     const [Eb, , Ib] = E.elasticProps(secSpec(ST.beam));
-    return Eb * Ib / ST.geo.bay;
+    const bx = spans()[0];
+    return Eb * Ib / (sum(bx) / bx.length);
   }
   function springK() {
     if (ST.conn.by === 'k') return ST.conn.k;
@@ -99,9 +120,9 @@
   }
 
   function totalBeamLength() {
-    const g = ST.geo;
-    if (ST.dim === 2) return g.n_bays * g.bay;
-    return g.n_bays * g.bay * (g.n_bays_y + 1) + g.n_bays_y * g.bay_y * (g.n_bays + 1);
+    const g = ST.geo, [bx, by] = spans();
+    if (ST.dim === 2) return sum(bx);
+    return sum(bx) * (g.n_bays_y + 1) + sum(by) * (g.n_bays + 1);
   }
   function masses() {
     const ld = ST.loads;
@@ -117,7 +138,7 @@
     const conn = { type: ST.conn.type };
     if (conn.type === 'Semi-rigid') conn.mat = springSpec();
     const elastic = ST.ele.type === 'elasticBeamColumn';
-    return {
+    const p = {
       dim, n_stories: g.n_stories, n_bays: g.n_bays, bay: g.bay,
       n_bays_y: dim === 3 ? g.n_bays_y : 0, bay_y: dim === 3 ? g.bay_y : g.bay,
       h1: g.h1, h: g.h, rigid_diaphragm: g.rigid, pdelta: g.pdelta, ele_type: ST.ele.type,
@@ -125,6 +146,45 @@
       col_sec: secSpec(ST.col), beam_sec: secSpec(ST.beam), conn,
       w_floor: ST.loads.w_floor, w_roof: ST.loads.w_roof, m_floor: mF, m_roof: mR,
     };
+    if (g.unequal) {
+      const [bx, by] = spans();
+      p.bays = bx; p.heights = g.heights.slice();
+      if (dim === 3) p.bays_y = by;
+    }
+    if (isCustom() && curCustom()) p.custom = customDescription();
+    return p;
+  }
+
+  /** Engine description of the custom model (see engine.js). */
+  function customDescription() {
+    const cm = curCustom(), dim = ST.dim;
+    const names = cm.springs.map(s => s.name);
+    return {
+      dim,
+      nodes: cm.nodes.map(n => ({ id: n.id, xyz: dim === 2 ? [n.x, n.y] : [n.x, n.y, n.z], sup: n.sup, m: n.m, P: n.P })),
+      frames: cm.frames.map(f => Object.assign({}, f)),
+      shells: cm.shells.map(s => Object.assign({}, s, { n: s.n.slice() })),
+      links: cm.links.map(l => ({ id: l.id, i: l.i, j: l.j,
+        dofs: l.dofs.map(t => (t === 'free' || t === 'rigid' ? t : names.indexOf(t))) })),
+      springs: cm.springs.map(s => matSpec(s.mat, M.J)),
+      massFromLoads: cm.massFromLoads,
+    };
+  }
+
+  const newSpring = name => ({ name, mat: matState(M.J) });
+
+  /** Custom model generated from the current regular-grid inputs. */
+  function customFromRegular() {
+    const layout = ST.geo.layout;
+    ST.geo.layout = 'regular';
+    const p = params();
+    ST.geo.layout = layout;
+    const springs = [];
+    if (ST.conn.type === 'Semi-rigid') {
+      const sp = springSpec();
+      springs.push({ name: 'K1', mat: { type: sp.type, vals: { [sp.type]: clone(sp.v) } } });
+    }
+    return FA.editor.fromDescription(E.regularLayout(p), springs, ST.loads.mass_mode !== 'manual');
   }
 
   // ========================================================================
@@ -306,7 +366,9 @@
     [['singular', 'zero pivot', 'LinSOE::solve', 'factorization'],
      '**The stiffness matrix is singular — the model is a mechanism or has a zero stiffness.** Check section ' +
      'dimensions/E (no zeros), the connection type (e.g. pinned beams with a very flexible structure) and the ' +
-     'joint spring stiffness.'],
+     'joint spring stiffness. In a custom model also check the supports (enough restraints?), nodes that are ' +
+     'connected only by pinned ends, and zero-length elements whose dofs are all Free. The node and dof of the zero ' +
+     'pivot are given in the engine messages.'],
     [['failed to converge', 'analyze failed', 'Analysis::analyze', 'did not converge', 'compatible element forces'],
      '**Nonlinear solution did not converge.** Try a smaller analysis dt or more pushover steps, a lower scale ' +
      'factor / target drift, or check the run with *elasticBeamColumn* first: if the elastic model runs, the ' +
@@ -433,26 +495,82 @@
   }
 
   const LIVE = [];          // captions refreshed on every input change
+  const LIVE_MODEL = [];    // captions refreshed after every model build
 
   function renderSidebar() {
     const sb = $('#sidebar'), root = $('#model-form');
     const scroll = sb.scrollTop;
     root.innerHTML = '';
     LIVE.length = 0;
+    LIVE_MODEL.length = 0;
     const dim = ST.dim, g = ST.geo;
-    root.append(seg('Model type', [[2, '2D frame'], [3, '3D frame']], ST, 'dim', {
-      onChange: () => { clearResults(); renderSidebar(); renderAll(); modelChanged(); },
-    }));
+    const layoutChanged = () => {
+      if (isCustom() && !curCustom()) ST.custom['d' + ST.dim] = customFromRegular();
+      FA.editor.reset();
+      clearResults(); renderSidebar(); renderAll(true); modelChanged();
+    };
+    root.append(seg('Model type', [[2, '2D frame'], [3, '3D frame']], ST, 'dim', { onChange: layoutChanged }));
+    const custom = isCustom();
 
     root.append(exp('1 · Geometry', b => {
-      b.append(num('Stories', g, 'n_stories', { min: 1, max: 30, int: true, step: 1 }));
-      b.append(row(2, num(dim === 3 ? 'Bays in X' : 'Bays', g, 'n_bays', { min: 1, max: 20, int: true, step: 1 }),
-        num(dim === 3 ? 'Bay width X (m)' : 'Bay width (m)', g, 'bay', { min: 0.1, step: 0.5 })));
-      if (dim === 3) b.append(row(2, num('Bays in Y', g, 'n_bays_y', { min: 1, max: 20, int: true, step: 1 }),
-        num('Bay width Y (m)', g, 'bay_y', { min: 0.1, step: 0.5 })));
-      b.append(row(2, num('1st story h (m)', g, 'h1', { min: 0.1, step: 0.1 }), num('Typical h (m)', g, 'h', { min: 0.1, step: 0.1 })));
+      b.append(seg('Layout', [['regular', 'Regular grid'], ['custom', 'Custom model']], g, 'layout', {
+        help: 'Custom model: edit nodes, frame elements, supports, shells and zero-length elements in the Model tab. ' +
+              'It starts as a copy of the regular grid.',
+        onChange: layoutChanged,
+      }));
+      if (custom) {
+        const cm = curCustom(), cap = note('');
+        const upd = () => {
+          cap.innerHTML = md(`**Custom ${dim}D model**: ${cm.nodes.length} nodes, ${cm.frames.length} frame, ${cm.shells.length} shell and ` +
+            `${cm.links.length} zero-length elements. Edit it in the **Model** tab.`);
+        };
+        upd();
+        LIVE.push(upd);
+        b.append(cap);
+        b.append(h('div', { class: 'actions' }, h('button', {
+          type: 'button', class: 'btn small ghost', title: 'Replace the custom model by the regular grid defined by the inputs of the Regular layout',
+          onclick: () => {
+            if (!confirm('Replace the custom model by a copy of the regular grid? Your edits will be lost.')) return;
+            ST.custom['d' + ST.dim] = customFromRegular();
+            layoutChanged();
+          },
+        }, 'Re-create from regular grid')));
+      } else {
+        const lists = h('div');
+        const drawLists = () => {
+          lists.innerHTML = '';
+          if (!g.unequal) return;
+          syncLists();
+          const listInputs = (labelText, arr, prefix) => {
+            const cells = arr.map((_, i) => num(`${prefix}${i + 1}`, arr, i, { min: 0.1, step: 0.1 }));
+            return h('div', {}, h('div', { class: 'sub-head' }, labelText), h('div', { class: 'list-grid' }, cells));
+          };
+          lists.append(listInputs(dim === 3 ? 'Bay widths in X (m), left to right' : 'Bay widths (m), left to right', g.bays, 'Bay '));
+          if (dim === 3) lists.append(listInputs('Bay widths in Y (m)', g.bays_y, 'Bay '));
+          lists.append(listInputs('Story heights (m), bottom to top', g.heights, 'Story '));
+        };
+        const counts = { min: 1, int: true, step: 1, onChange: () => { drawLists(); modelChanged(); } };
+        b.append(num('Stories', g, 'n_stories', Object.assign({ max: 30 }, counts)));
+        if (!g.unequal) {
+          b.append(row(2, num(dim === 3 ? 'Bays in X' : 'Bays', g, 'n_bays', Object.assign({ max: 20 }, counts)),
+            num(dim === 3 ? 'Bay width X (m)' : 'Bay width (m)', g, 'bay', { min: 0.1, step: 0.5 })));
+          if (dim === 3) b.append(row(2, num('Bays in Y', g, 'n_bays_y', Object.assign({ max: 20 }, counts)),
+            num('Bay width Y (m)', g, 'bay_y', { min: 0.1, step: 0.5 })));
+          b.append(row(2, num('1st story h (m)', g, 'h1', { min: 0.1, step: 0.1 }), num('Typical h (m)', g, 'h', { min: 0.1, step: 0.1 })));
+        } else {
+          b.append(row(2, num(dim === 3 ? 'Bays in X' : 'Bays', g, 'n_bays', Object.assign({ max: 20 }, counts)),
+            dim === 3 ? num('Bays in Y', g, 'n_bays_y', Object.assign({ max: 20 }, counts)) : h('div')));
+        }
+        b.append(check('Unequal bay widths / story heights', g, 'unequal', {
+          onChange: () => { if (g.unequal) syncLists(); renderSidebar(); modelChanged(); },
+        }));
+        b.append(lists);
+        drawLists();
+      }
       b.append(check('Rigid floor diaphragm' + (dim === 3 ? ' (rigidDiaphragm)' : ' (equalDOF)'), g, 'rigid'));
-      b.append(check('P-Delta for columns', g, 'pdelta'));
+      b.append(check(custom ? 'P-Delta for columns and inclined members' : 'P-Delta for columns', g, 'pdelta'));
+      if (custom) b.append(note('In a custom model the floors are the levels above the lowest node that carry mass and hold a ' +
+        'horizontal member or slab; the diaphragm ties the free nodes of each floor.'));
     }));
 
     root.append(exp('2 · Element', b => {
@@ -464,15 +582,21 @@
     }));
 
     root.append(exp('3 · Column section', b => {
+      if (custom) b.append(note('Assigned to the frame elements with section *Column* (by default the vertical ones).'));
       if (dim === 3) b.append(note('Column depth h is along global X, width b along Y.'));
       sectionInputs(b, ST.col);
     }));
     root.append(exp('4 · Beam section', b => {
-      if (dim === 3) b.append(note('Used for beams in both X and Y. Depth h is vertical.'));
+      if (custom) b.append(note('Assigned to the frame elements with section *Beam* (by default the non-vertical ones). Depth h is in the vertical plane of the member.'));
+      else if (dim === 3) b.append(note('Used for beams in both X and Y. Depth h is vertical.'));
       sectionInputs(b, ST.beam);
     }));
 
-    root.append(exp('5 · Beam–column connection', b => {
+    if (custom) root.append(exp('5 · Beam–column connection', b => {
+      b.append(note('In a custom model connections are modelled element by element: **pinned ends** in the frame-element ' +
+        'table (or *Pin both* on a selection) and **springs** with zero-length elements (+ Zero-length tool).'));
+    }));
+    else root.append(exp('5 · Beam–column connection', b => {
       const c = ST.conn;
       b.append(seg('Connection type', ['Rigid', 'Pinned', 'Semi-rigid'], c, 'type', {
         help: 'Applied at both ends of every beam. Column-to-column joints and the base stay continuous / fixed.',
@@ -502,7 +626,23 @@
       }
     }));
 
-    root.append(exp('6 · Loads & mass', b => {
+    if (custom) root.append(exp('6 · Loads & mass', b => {
+      const cm = curCustom();
+      b.append(note('Gravity loads are defined per element (frame w, shell ρ and q) and per node (P) in the Model tab.'));
+      b.append(num('Load w of new beams (kN/m)', ST.loads, 'w_floor', { step: 1, onChange: saveState }));
+      b.append(seg('Seismic mass', [[true, 'Gravity loads / g + nodal'], [false, 'Nodal masses only']], cm, 'massFromLoads', { small: true }));
+      const cap = note('');
+      const upd = () => {
+        if (!MODEL || !MODEL.custom) { cap.textContent = ''; return; }
+        const W = MODEL.total_mass * G;
+        cap.textContent = `Floors found: ${MODEL.ns} · floor masses: ${MODEL.floor_mass.map(m => fmt(m, 1)).join(', ')} t · ` +
+          `total weight ${fmt(W, 0)} kN`;
+      };
+      upd();
+      LIVE_MODEL.push(upd);
+      b.append(cap);
+    }));
+    else root.append(exp('6 · Loads & mass', b => {
       const ld = ST.loads;
       b.append(row(2, num('Floor beam load (kN/m)', ld, 'w_floor', { step: 1 }), num('Roof beam load (kN/m)', ld, 'w_roof', { step: 1 })));
       if (dim === 3) b.append(note('Applied to every beam in X and Y.'));
@@ -516,6 +656,34 @@
         LIVE.push(upd);
         b.append(cap);
       }
+    }));
+
+    if (custom) root.append(exp('7 · Zero-length materials', b => {
+      const cm = curCustom();
+      b.append(note('Spring materials for the zero-length elements: force in kN or moment in kN·m, deformation in m or rad.'));
+      cm.springs.forEach((sp, k) => {
+        const box = h('div', { class: 'spring-box' });
+        const name = h('input', { type: 'text', value: sp.name, class: 'mono' });
+        name.addEventListener('change', () => {
+          const v = name.value.trim();
+          if (!v || v === 'free' || v === 'rigid' || cm.springs.some(o => o !== sp && o.name === v)) { name.value = sp.name; return; }
+          for (const l of cm.links) l.dofs = l.dofs.map(t => (t === sp.name ? v : t));
+          sp.name = v;
+          renderAll(true); modelChanged();
+        });
+        const used = cm.links.some(l => l.dofs.includes(sp.name));
+        box.append(h('div', { class: 'spring-head' }, h('label', {}, 'Name'), name,
+          h('button', { type: 'button', class: 'btn small ghost danger', disabled: used, title: used ? 'Used by zero-length elements' : 'Delete',
+            onclick: () => { cm.springs.splice(k, 1); renderSidebar(); renderAll(true); modelChanged(); } }, 'Delete')));
+        materialInputs(box, sp.mat, M.J, 'Material');
+        b.append(box);
+      });
+      b.append(h('button', { type: 'button', class: 'btn small ghost', onclick: () => {
+        let k = cm.springs.length + 1;
+        while (cm.springs.some(o => o.name === 'K' + k)) k++;
+        cm.springs.push(newSpring('K' + k));
+        renderSidebar(); renderAll(true); modelChanged();
+      } }, '+ Add spring material'));
     }));
     sb.scrollTop = scroll;
   }
@@ -549,6 +717,7 @@
     MODEL = info; MODEL_ERR = err; BUILDING = false;
     renderModelTab();
     renderModal();
+    for (const f of LIVE_MODEL) f();
     $('#app-title').textContent = `${ST.dim}D Frame Analyzer`;
   }
 
@@ -558,7 +727,14 @@
 
   function clearResults() { RES = { dim: ST.dim }; }
 
-  const span = info => Math.max(info.xs[info.xs.length - 1], info.yg[info.yg.length - 1], info.levels[info.levels.length - 1]);
+  function span(info) {
+    let s = 0;
+    for (let k = 0; k < info.dim; k++) {
+      const v = info.all_nodes.map(n => info.coords[n][k]);
+      s = Math.max(s, Math.max(...v) - Math.min(...v));
+    }
+    return s || 1;
+  }
   function displaced(info, disp, sc) {
     const out = {};
     for (const n in disp) out[n] = info.coords[n].map((c, i) => c + sc * disp[n][i]);
@@ -594,19 +770,44 @@
     return lines;
   }
 
-  function renderModelTab() {
+  const editorApi = {
+    cm: () => curCustom(), dim: () => ST.dim, changed: () => modelChanged(), beamLoad: () => ST.loads.w_floor,
+    springsChanged: () => renderSidebar(), newSpring,
+  };
+
+  /** Model tab: the editor (custom models, kept across rebuilds) and the model summary. */
+  function renderModelTab(force) {
     const panel = $('#tab-model');
-    panel.innerHTML = '';
+    if (!isCustom()) { panel.innerHTML = ''; renderModelInfo(panel); return; }
+    let ed = $('#model-editor'), box = $('#model-info');
+    if (force || !ed || ed._cm !== curCustom()) {
+      panel.innerHTML = '';
+      ed = h('div', { id: 'model-editor' });
+      ed._cm = curCustom();
+      box = h('div', { id: 'model-info' });
+      panel.append(ed, box);
+      FA.editor.render(ed, editorApi);
+    }
+    box.innerHTML = '';
+    renderModelInfo(box);
+  }
+
+  function renderModelInfo(panel) {
     panel.append(h('div', { class: 'status', id: 'model-status' }));
     renderModelStatus();
     if (MODEL_ERR) { panel.append(failureBlock('Model build / gravity analysis', MODEL_ERR, MODEL_ERR.log)); return; }
     if (!MODEL) { panel.append(h('div', { class: 'empty' }, 'Building the model…')); return; }
     const info = MODEL, p = params(), dim = info.dim;
     const left = h('div', { class: 'card' }), right = h('div');
-    const plan = dim === 3 ? `${p.n_bays}×${p.n_bays_y}-bay` : `${p.n_bays}-bay`;
     const fr = h('div');
     left.append(fr);
-    requestAnimationFrame(() => PL.frame(fr, info, { title: `${p.n_stories}-story, ${plan} frame · ${info.conn.toLowerCase()} beam–column joints`, height: 420 }));
+    let title;
+    if (info.custom) title = `Custom ${dim}D model · ${info.ns} floor${info.ns === 1 ? '' : 's'} with mass`;
+    else {
+      const plan = dim === 3 ? `${p.n_bays}×${p.n_bays_y}-bay` : `${p.n_bays}-bay`;
+      title = `${p.n_stories}-story, ${plan} frame · ${info.conn.toLowerCase()} beam–column joints`;
+    }
+    requestAnimationFrame(() => PL.frame(fr, info, { title, height: 420 }));
 
     const rows = [];
     for (const [name, s] of [['Column', p.col_sec], ['Beam', p.beam_sec]]) {
@@ -624,13 +825,23 @@
     if (dim === 3) cols.push({ key: 'Iw', label: 'I weak (cm⁴)', fmt: f0 }, { key: 'J', label: 'J (cm⁴)', fmt: f0 });
     cols.push({ key: 'bars', label: 'Bars' }, { key: 'As', label: 'As (mm²)', fmt: f0 }, { key: 'rho', label: 'ρ (%)', fmt: v => fmt(v, 2) });
     right.append(table(cols, rows));
-    const W = info.floor_mass.reduce((a, b) => a + b, 0) * G;
+    const W = info.total_mass * G;
     right.append(h('div', { class: 'metrics' }, metric('Total seismic weight', `${fmt(W, 0)} kN`),
-      metric('Total height', `${fmt(info.levels[info.levels.length - 1], 2)} m`)));
-    right.append(note(`Nodes: ${info.all_nodes.length} · Columns: ${info.columns.length} · Beams: ${info.beams.length} · ` +
-      `Joint springs: ${info.springs.length} · Equations: ${info.n_eq} · Gravity analysis converged ✓`));
+      metric('Total height', `${fmt(info.levels[info.levels.length - 1] - info.levels[0], 2)} m`)));
+    if (info.custom) {
+      right.append(note(`Nodes: ${info.all_nodes.length} · Frame elements: ${info.frames.length} (${info.columns.length} column, ` +
+        `${info.beams.length} beam section) · Shells: ${info.shells.length} · Zero-length: ${info.links.length} · ` +
+        `Equations: ${info.n_eq} · Dynamic dofs: ${info.max_modes} · Gravity analysis converged ✓`));
+      if (info.ns) right.append(note(`Floor levels (m): ${info.levels.slice(1).map(z => fmt(z, 2)).join(', ')} · base at ${fmt(info.levels[0], 2)} m`));
+      else right.append(banner('warn', '<p>No level above the base carries mass: modal, pushover and time-history analyses need mass. ' +
+        'Add beam loads (w), shell loads or nodal masses.</p>'));
+    } else {
+      right.append(note(`Nodes: ${info.all_nodes.length} · Columns: ${info.columns.length} · Beams: ${info.beams.length} · ` +
+        `Joint springs: ${info.springs.length} · Equations: ${info.n_eq} · Gravity analysis converged ✓`));
+    }
     right.append(logBox(info.domain.logText()));
-    panel.append(h('div', { class: 'grid2' }, left, right));
+    if (info.custom) panel.append(h('h3', {}, 'Model summary'), h('div', { class: 'grid2' }, left, right));
+    else panel.append(h('div', { class: 'grid2' }, left, right));
 
     panel.append(h('h3', {}, 'Cross-sections'));
     const secs = h('div', { class: 'thirds' });
@@ -667,7 +878,7 @@
   function renderModal() {
     const panel = $('#tab-modal');
     panel.innerHTML = '';
-    const maxModes = MODEL ? MODEL.max_modes : 200;
+    const maxModes = MODEL ? Math.max(1, MODEL.max_modes) : 200;
     if (ST.modal.n_modes === null || ST.modal.n_modes > maxModes) ST.modal.n_modes = Math.min(ST.dim === 2 ? 3 : 6, maxModes);
     const run = h('button', { type: 'button', class: 'btn primary run-btn', disabled: !!RUN, onclick: runModal }, 'Run modal analysis');
     panel.append(h('div', { class: 'controls' },
@@ -977,9 +1188,9 @@
   // ========================================================================
   // Page wiring
   // ========================================================================
-  function renderAll() {
+  function renderAll(force) {
     $('#app-title').textContent = `${ST.dim}D Frame Analyzer`;
-    renderModelTab();
+    renderModelTab(force);
     renderModal();
     renderPo();
     renderTh();
@@ -1007,7 +1218,8 @@
           if (!s || (s.dim !== 2 && s.dim !== 3) || !s.geo) throw new Error('not a model file');
           ST = merge(defaults(), s);
           clearResults();
-          renderSidebar(); renderAll(); modelChanged();
+          FA.editor.reset();
+          renderSidebar(); renderAll(true); modelChanged();
         } catch (e) { alert('Could not open the model file: ' + e.message); }
         ev.target.value = '';
       };
@@ -1017,7 +1229,8 @@
       if (!confirm('Restore the default model? Your current inputs will be replaced.')) return;
       ST = defaults();
       clearResults();
-      renderSidebar(); renderAll(); modelChanged();
+      FA.editor.reset();
+      renderSidebar(); renderAll(true); modelChanged();
     });
     renderSidebar();
     renderAll();
@@ -1027,5 +1240,5 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 
-  FA.app = { get state() { return ST; }, params, get model() { return MODEL; }, get results() { return RES; } };
+  FA.app = { get state() { return ST; }, params, customFromRegular, get model() { return MODEL; }, get results() { return RES; } };
 })(globalThis.FA = globalThis.FA || {});

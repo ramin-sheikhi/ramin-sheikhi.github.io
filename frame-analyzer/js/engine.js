@@ -310,6 +310,10 @@
     residual(R) {
       this.formFint(R);
       const n = this.neq;
+      if (this.Pg) {                     // nodal gravity loads (constant after gravity)
+        const lg = this.lamG, Pg = this.Pg;
+        for (let i = 0; i < n; i++) R[i] -= lg * Pg[i];
+      }
       if (this.mode === 'load') {
         for (let i = 0; i < n; i++) R[i] = -R[i];
       } else if (this.mode === 'disp') {
@@ -606,15 +610,26 @@
   // ========================================================================
   const nodeTag = (floor, ix, iy = 0) => floor * 10000 + iy * 100 + ix + 1;
 
-  /** [X grid, Y grid, level elevations]. The Y grid is [0] in 2D. */
+  /** Cumulative grid [0, s0, s0 + s1, ...] of n spacings (list, or uniform `uni`). */
+  function grid(n, uni, list) {
+    const out = [0.0];
+    for (let i = 0; i < n; i++) out.push(out[i] + (list && list[i] > 0 ? list[i] : uni));
+    return out;
+  }
+
+  /**
+   * [X grid, Y grid, level elevations]. The Y grid is [0] in 2D. Optional
+   * lists p.bays, p.bays_y and p.heights (bottom to top) override the uniform
+   * bay widths and story heights.
+   */
   function frameGeometry(p) {
     const levels = [0.0];
-    for (let i = 0; i < p.n_stories; i++) levels.push(levels[levels.length - 1] + (i === 0 ? p.h1 : p.h));
-    const xs = [];
-    for (let j = 0; j <= p.n_bays; j++) xs.push(j * p.bay);
-    const yg = [];
-    if ((p.dim || 2) === 3) for (let k = 0; k <= p.n_bays_y; k++) yg.push(k * p.bay_y);
-    else yg.push(0.0);
+    for (let i = 0; i < p.n_stories; i++) {
+      const hl = p.heights && p.heights[i] > 0 ? p.heights[i] : (i === 0 ? p.h1 : p.h);
+      levels.push(levels[i] + hl);
+    }
+    const xs = grid(p.n_bays, p.bay, p.bays);
+    const yg = (p.dim || 2) === 3 ? grid(p.n_bays_y, p.bay_y, p.bays_y) : [0.0];
     return [xs, yg, levels];
   }
 
@@ -624,19 +639,31 @@
   };
 
   // ========================================================================
-  // Model
+  // Model description
   // ========================================================================
-  /**
-   * Create the frame (no loads analysed yet) and return a model-info object.
-   * p: dim (2|3), n_stories, n_bays, bay (X), n_bays_y, bay_y (3D only),
-   *    h1, h, rigid_diaphragm, pdelta, ele_type, n_ip, integ,
-   *    col_sec, beam_sec, w_floor, w_roof (kN/m on every beam),
-   *    m_floor, m_roof (t per floor),
-   *    conn: {type: 'Rigid'|'Pinned'|'Semi-rigid', mat: spring material spec (kN·m, rad)}
+  /*
+   * Every model is built from a description (the regular frame generator and
+   * the custom-model editor both produce one):
+   *   dim      2 | 3 (vertical axis: Y in 2D, Z in 3D)
+   *   nodes    [{id, xyz, sup: [0|1 per dof] | null, m: added mass (t),
+   *             P: added gravity load (kN, downwards)}]
+   *   frames   [{id, i, j, sec: 'col' | 'beam', w: gravity load (kN per m of
+   *             member), ri, rj}]; end release ri / rj: 0 none, 1 strong-axis
+   *             moment (local z), 2 both bending moments (3D)
+   *   shells   [{id, n: [4 node ids], t (m), E (MPa), nu, rho (t/m³),
+   *             q: gravity load (kN/m²)}]
+   *   links    [{id, i, j, dofs}] zeroLength i -> j; per dof 'free', 'rigid'
+   *             (node j follows node i) or an index into springs
+   *   springs  [uniaxial material spec in kN, m, rad]
+   *   massFromLoads  masses = gravity loads / g (+ node m); else node m only
+   *   floors   optional [[node ids]] bottom to top; found from the masses
+   *            (levels above the base that carry mass) if omitted
    */
-  function createModel(p) {
+  const fixAll = ndf => Array(ndf).fill(1);
+
+  /** Description of the regular frame of parameters p (see createModel). */
+  function regularLayout(p) {
     const dim = p.dim || 2, ndf = dim === 2 ? 3 : 6;
-    const D = new Domain(dim);
     const [xs, yg, levels] = frameGeometry(p);
     const ns = p.n_stories;
     const plan = [];
@@ -644,71 +671,248 @@
     const nn = plan.length;
     const point = (i, j, k) => (dim === 2 ? [xs[j], levels[i]] : [xs[j], yg[k], levels[i]]);
 
-    const coords = {}, allNodes = [], planNodes = [];
+    const nodes = [], floors = [], xyzOf = {};
     for (let i = 0; i <= ns; i++) {
-      planNodes.push([]);
+      const m = i === 0 ? 0 : (i === ns ? p.m_roof : p.m_floor) / nn;
+      const fl = [];
       for (const [j, k] of plan) {
-        const n = nodeTag(i, j, k);
-        D.addNode(n, point(i, j, k));
-        coords[n] = point(i, j, k);
-        allNodes.push(n);
-        planNodes[i].push(n);
+        const id = nodeTag(i, j, k);
+        nodes.push({ id, xyz: point(i, j, k), sup: i === 0 ? fixAll(ndf) : null, m, P: 0 });
+        xyzOf[id] = point(i, j, k);
+        fl.push(id);
       }
+      if (i) floors.push(fl);
     }
-    for (const n of planNodes[0]) D.nodes.get(n).map = Array.from({ length: ndf }, () => []);
+    const frames = [];
+    for (let i = 0; i < ns; i++)
+      for (const [j, k] of plan) frames.push({ id: frames.length + 1, i: nodeTag(i, j, k), j: nodeTag(i + 1, j, k), sec: 'col', w: 0 });
 
-    // Masses (lumped, split equally between the nodes of each floor)
-    const floorMass = [], nodeMass = {};
+    const conn = p.conn || { type: 'Rigid' };
+    const links = [], springs = [];
+    if (conn.type === 'Semi-rigid') springs.push(conn.mat);
+    let aux = 1000000;
+    function beamEnd(n, bdir) {                 // joint spring: node n -> new beam-end node
+      if (conn.type !== 'Semi-rigid') return n;
+      const bn = ++aux;
+      nodes.push({ id: bn, xyz: xyzOf[n].slice(), sup: null, m: 0, P: 0 });
+      const dofs = Array(ndf).fill('rigid');
+      dofs[dim === 2 ? 2 : (bdir === 1 ? 4 : 3)] = 0;
+      links.push({ id: links.length + 1, i: n, j: bn, dofs });
+      return bn;
+    }
+    const rel = conn.type === 'Pinned' ? 1 : 0;
     for (let i = 1; i <= ns; i++) {
-      const m = i === ns ? p.m_roof : p.m_floor;
-      floorMass.push(m);
-      for (const n of planNodes[i]) {
-        nodeMass[n] = m / nn;
-        D.nodes.get(n).mass = m / nn;
+      const lines = [];
+      for (let k = 0; k < yg.length; k++)
+        for (let j = 0; j < xs.length - 1; j++) lines.push([1, nodeTag(i, j, k), nodeTag(i, j + 1, k)]);
+      if (dim === 3)
+        for (let j = 0; j < xs.length; j++)
+          for (let k = 0; k < yg.length - 1; k++) lines.push([2, nodeTag(i, j, k), nodeTag(i, j, k + 1)]);
+      const w = i === ns ? p.w_roof : p.w_floor;
+      for (const [bdir, na, nb] of lines) {
+        const a = beamEnd(na, bdir), b = beamEnd(nb, bdir);
+        frames.push({ id: frames.length + 1, i: a, j: b, sec: 'beam', w, ri: rel, rj: rel });
+      }
+    }
+    return { dim, nodes, frames, shells: [], links, springs, floors, massFromLoads: false,
+             grid: { xs, yg }, conn: conn.type };
+  }
+
+  // ========================================================================
+  // Model
+  // ========================================================================
+  /**
+   * Create the frame (no loads analysed yet) and return a model-info object.
+   * p: dim (2|3), n_stories, n_bays, bay (X), n_bays_y, bay_y (3D only),
+   *    bays, bays_y, heights (optional lists, see frameGeometry),
+   *    h1, h, rigid_diaphragm, pdelta, ele_type, n_ip, integ,
+   *    col_sec, beam_sec, w_floor, w_roof (kN/m on every beam),
+   *    m_floor, m_roof (t per floor),
+   *    conn: {type: 'Rigid'|'Pinned'|'Semi-rigid', mat: spring material spec (kN·m, rad)},
+   *    custom: a model description used instead of the regular frame
+   */
+  function createModel(p) {
+    return buildDescription(p.custom || regularLayout(p), p);
+  }
+
+  /**
+   * Build the model of a description. Element and constraint options come
+   * from p: ele_type, n_ip, integ, col_sec, beam_sec, rigid_diaphragm, pdelta.
+   */
+  function buildDescription(desc, p) {
+    const dim = desc.dim || 2, ndf = dim === 2 ? 3 : 6, V = dim - 1;
+    const D = new Domain(dim);
+    const coords = {}, allNodes = [], byId = new Map();
+    for (const nd of desc.nodes) {
+      if (byId.has(nd.id)) throw new Error(`Node ${nd.id} is defined twice`);
+      const xyz = (nd.xyz || []).slice(0, dim).map(Number);
+      if (xyz.length < dim || xyz.some(v => !isFinite(v))) throw new Error(`Node ${nd.id} has invalid coordinates`);
+      byId.set(nd.id, nd);
+      D.addNode(nd.id, xyz);
+      coords[nd.id] = xyz;
+      allNodes.push(nd.id);
+    }
+    const descIds = allNodes.slice();
+    const need = (id, what) => { if (!byId.has(id)) throw new Error(`${what} refers to node ${id}, which does not exist`); };
+    const sub = (a, b) => coords[a].map((v, k) => v - coords[b][k]);
+    const supOf = id => { const s = byId.get(id).sup; return s && s.some(Boolean) ? s : null; };
+    const fixed = (id, d) => { const s = supOf(id); return !!(s && s[d]); };
+    const ALL = [...Array(ndf).keys()], TRANS = [...Array(dim).keys()];
+
+    // ---- loads and masses
+    const fromLoads = !!desc.massFromLoads;
+    const mass = new Map(descIds.map(id => [id, Math.max(0, +byId.get(id).m || 0)]));
+    const loads = [];                                        // [node, dof (0-based), value]
+    const addWeight = (id, W) => {
+      if (!W) return;
+      loads.push([id, V, -W]);
+      if (fromLoads && W > 0) mass.set(id, mass.get(id) + W / G);
+    };
+    for (const nd of desc.nodes) addWeight(nd.id, +nd.P || 0);
+
+    // ---- which dofs carry stiffness
+    const act = new Map(descIds.map(id => [id, new Uint8Array(ndf)]));
+    const mark = (id, dofs) => { const a = act.get(id); for (const d of dofs) a[d] = 1; };
+    for (const f of desc.frames) {
+      need(f.i, `Frame element ${f.id}`);
+      need(f.j, `Frame element ${f.id}`);
+      const L = Math.hypot(...sub(f.j, f.i));
+      if (!(L > 1e-9)) throw new Error(`Frame element ${f.id} has zero length`);
+      mark(f.i, f.ri ? TRANS : ALL);                         // released ends do not stiffen the node rotation
+      mark(f.j, f.rj ? TRANS : ALL);
+      const w = +f.w || 0;
+      if (fromLoads && w > 0) for (const n of [f.i, f.j]) mass.set(n, mass.get(n) + 0.5 * w * L / G);
+    }
+    const shellArea = [];
+    for (const s of desc.shells) {
+      if (!s.n || s.n.length !== 4 || new Set(s.n).size !== 4) throw new Error(`Shell element ${s.id} needs 4 different nodes`);
+      for (const n of s.n) need(n, `Shell element ${s.id}`);
+      if (!(s.t > 0) || !(s.E > 0) || !(s.nu >= 0 && s.nu < 0.5))
+        throw new Error(`Shell element ${s.id}: thickness and E must be > 0 and 0 ≤ ν < 0.5`);
+      for (const n of s.n) mark(n, dim === 2 ? [0, 1] : ALL);
+      const P4 = s.n.map(n => coords[n]);
+      let A;
+      if (dim === 2) A = Math.abs(EL.quadArea(P4));
+      else {
+        const d13 = P4[2].map((v, k) => v - P4[0][k]), d24 = P4[3].map((v, k) => v - P4[1][k]);
+        A = 0.5 * Math.hypot(...EL.cross(d13, d24));
+      }
+      shellArea.push(A);
+      const W = ((+s.rho || 0) * G * s.t + (+s.q || 0)) * A;
+      for (const n of s.n) addWeight(n, W / 4);
+    }
+    const springs = desc.springs || [];
+    const tie = new Map();                                   // 'node:dof' -> master node (rigid zeroLength dofs)
+    for (const l of desc.links) {
+      need(l.i, `Zero-length element ${l.id}`);
+      need(l.j, `Zero-length element ${l.id}`);
+      if (l.i === l.j) throw new Error(`Zero-length element ${l.id} connects node ${l.i} to itself`);
+      l.dofs.forEach((t, d) => {
+        if (d >= ndf) return;
+        if (t === 'rigid') {
+          const key = l.j + ':' + d;
+          if (tie.has(key)) D.log(`WARNING zero-length element ${l.id}: dof ${d + 1} of node ${l.j} is already tied; ignored`);
+          else if (fixed(l.j, d)) D.log(`WARNING zero-length element ${l.id}: dof ${d + 1} of node ${l.j} is restrained; rigid tie ignored`);
+          else tie.set(key, l.i);
+        } else if (typeof t === 'number') {
+          if (!springs[t]) throw new Error(`Zero-length element ${l.id}: unknown spring material`);
+          mark(l.i, [d]);
+          mark(l.j, [d]);
+        }
+      });
+    }
+    const splitKey = key => key.split(':').map(Number);
+    for (let changed = true; changed;) {                     // a tied dof makes its master dof active
+      changed = false;
+      for (const [key, m] of tie) {
+        const [n, d] = splitKey(key);
+        if (act.get(n)[d] && !act.get(m)[d]) { act.get(m)[d] = 1; changed = true; }
       }
     }
 
-    // Free dofs and rigid floors; floorNodes[i] represents level i
-    const floorNodes = [planNodes[0][0]];
-    for (let i = 1; i <= ns; i++) {
-      const nodes = planNodes[i];
-      if (!p.rigid_diaphragm) {
-        for (const n of nodes) D.freeNode(n);
-        floorNodes.push(nodes[0]);
-      } else if (dim === 2) {
-        const m0 = D.freeNode(nodes[0]);
-        for (const n of nodes.slice(1)) {
-          const nd = D.freeNode(n, [0]);
-          nd.map[0] = m0.map[0];                    // equalDOF(master, n, 1)
-        }
-        floorNodes.push(nodes[0]);
-      } else {
-        const master = 2000000 + i;
-        const xm = (xs[0] + xs[xs.length - 1]) / 2, ym = (yg[0] + yg[yg.length - 1]) / 2;
-        const mn = D.addNode(master, [xm, ym, levels[i]]);
-        mn.map = [D.newVar(master, 0), D.newVar(master, 1), [], [], [], D.newVar(master, 5)];
-        const [ux] = mn.map[0], [uy] = mn.map[1], [rz] = mn.map[5];
-        for (const n of nodes) {
-          const nd = D.freeNode(n, [0, 1, 5]);    // rigidDiaphragm(3, master, ...)
-          const [x, y] = coords[n];
-          nd.map[0] = [[ux[0], 1], [rz[0], -(y - ym)]];
-          nd.map[1] = [[uy[0], 1], [rz[0], x - xm]];
-          nd.map[5] = [[rz[0], 1]];
-        }
-        coords[master] = [xm, ym, levels[i]];
-        floorNodes.push(master);
+    // ---- unknowns: supports and idle dofs have none
+    let idleDofs = 0;
+    for (const id of descIds) {
+      const node = D.nodes.get(id), a = act.get(id);
+      node.map = Array(ndf).fill(null);
+      let used = false;
+      for (let d = 0; d < ndf; d++) {
+        if (tie.has(id + ':' + d)) { used = true; continue; }
+        if (fixed(id, d)) node.map[d] = [];
+        else if (!a[d]) { node.map[d] = []; idleDofs++; }
+        else used = true;
+      }
+      if (!used && !supOf(id)) {
+        D.log(`WARNING node ${id} is not connected to any element; it is ignored` + (mass.get(id) > 0 ? ' (with its mass)' : ''));
+        idleDofs -= ndf;
       }
     }
-    let nDyn;
-    if (dim === 2) nDyn = p.rigid_diaphragm ? ns * (1 + nn) : 2 * ns * nn;
-    else nDyn = p.rigid_diaphragm ? ns * (3 + nn) : 3 * ns * nn;
+    if (idleDofs > 0) D.log(`Note: ${idleDofs} node dof(s) without stiffness (e.g. rotations of nodes attached only to shells or released members) were restrained automatically.`);
 
-    // Members
-    const colPD = !!p.pdelta;
-    const vec = { col: [0, 1, 0], bx: [0, -1, 0], by: [1, 0, 0] };
-    const transf = (a, b, kind) => new EL.Transf(dim, coords[a], coords[b], dim === 3 ? vec[kind] : null,
-      kind === 'col' && colPD);
+    // ---- floors and rigid diaphragms
+    const elev = id => coords[id][V];
+    const base = Math.min(...descIds.map(elev));
+    let floors = desc.floors;
+    if (!floors) {
+      const lv = new Map();
+      for (const id of descIds) {
+        const z = elev(id);
+        if (z <= base + 1e-6) continue;
+        const key = Math.round(z * 1e6);
+        if (!lv.has(key)) lv.set(key, []);
+        lv.get(key).push(id);
+      }
+      // floors: levels with mass that hold a horizontal member or slab (all levels with mass if none does)
+      const flat = new Set(), lkey = id => Math.round(elev(id) * 1e6);
+      for (const f of desc.frames) if (lkey(f.i) === lkey(f.j)) flat.add(lkey(f.i));
+      for (const sh of desc.shells) if (sh.n.every(n => lkey(n) === lkey(sh.n[0]))) flat.add(lkey(sh.n[0]));
+      const withMass = [...lv.entries()].sort((a, b) => a[0] - b[0]).filter(e => e[1].some(id => mass.get(id) > 0));
+      const floored = withMass.filter(e => flat.has(e[0]));
+      floors = (floored.length ? floored : withMass).map(e => e[1]);
+    }
+    const LAT = dim === 2 ? [0] : [0, 1, 5];
+    const floorRep = [];
+    floors.forEach((ids, fi) => {
+      const free = ids.filter(id => LAT.every(d => D.nodes.get(id).map[d] === null && !tie.has(id + ':' + d)));
+      let rep = free.length ? free[0] : ids[0];
+      if (p.rigid_diaphragm && free.length >= 2) {
+        if (dim === 2) {
+          const ux = D.newVar(free[0], 0);
+          for (const id of free) D.nodes.get(id).map[0] = ux;          // equalDOF(master, n, 1)
+        } else {
+          const xs = free.map(id => coords[id][0]), ys = free.map(id => coords[id][1]);
+          const xm = (Math.min(...xs) + Math.max(...xs)) / 2, ym = (Math.min(...ys) + Math.max(...ys)) / 2;
+          const z = elev(free[0]), master = 2000000 + fi + 1;
+          const mn = D.addNode(master, [xm, ym, z]);
+          mn.map = [D.newVar(master, 0), D.newVar(master, 1), [], [], [], D.newVar(master, 5)];
+          const [ux] = mn.map[0], [uy] = mn.map[1], [rz] = mn.map[5];
+          for (const id of free) {                                       // rigidDiaphragm(3, master, ...)
+            const nd = D.nodes.get(id), [x, y] = coords[id];
+            nd.map[0] = [[ux[0], 1], [rz[0], -(y - ym)]];
+            nd.map[1] = [[uy[0], 1], [rz[0], x - xm]];
+            nd.map[5] = [[rz[0], 1]];
+          }
+          coords[master] = [xm, ym, z];
+          rep = master;
+        }
+      }
+      floorRep.push(rep);
+    });
+    for (const id of descIds) {
+      const map = D.nodes.get(id).map;
+      for (let d = 0; d < ndf; d++) if (map[d] === null && !tie.has(id + ':' + d)) map[d] = D.newVar(id, d);
+    }
+    const resolve = (id, d, depth) => {                      // rigid ties: equalDOF(i, j, dof)
+      const map = D.nodes.get(id).map;
+      if (map[d] !== null) return map[d];
+      if (depth > descIds.length) throw new Error(`The rigid zero-length ties at node ${id} form a closed loop`);
+      map[d] = resolve(tie.get(id + ':' + d), d, depth + 1);
+      return map[d];
+    };
+    for (const key of tie.keys()) resolve(...splitKey(key), 0);
+    for (const id of descIds) D.nodes.get(id).mass = mass.get(id);
 
+    // ---- elements
     function member(spec) {
       if (p.ele_type === 'elasticBeamColumn') {
         const sp = SEC.sectionProps(spec);
@@ -719,71 +923,115 @@
       const Cls = p.ele_type === 'dispBeamColumn' ? EL.DispBeam : EL.ForceBeam;
       return (tr, wy) => new Cls(dim, tr, mk, rule, wy);
     }
-
     const makeCol = member(p.col_sec);
     const makeBeam = member(p.beam_sec);
-    let eleTag = 0;
-    const columns = [];
-    for (let i = 0; i < ns; i++) {
-      planNodes[i].forEach((a, idx) => {
-        const b = planNodes[i + 1][idx];
-        const t = ++eleTag;
-        const e = D.addElement(makeCol(transf(a, b, 'col'), 0), a, b);
-        e.tag = t;
-        columns.push([t, a, b]);
-      });
-    }
+    let eleTag = 0, aux = 3000000;
 
-    const conn = p.conn || { type: 'Rigid' };
-    const springs = [];
-    const springMat = conn.type === 'Semi-rigid' ? MAT.maker(conn.mat, 1.0) : null;
-    let aux = 1000000;
-
-    function beamEnd(n, bdir) {
-      if (conn.type === 'Rigid') return n;
+    /** Beam-end hinge: a node sharing every unknown of n except the released rotation(s). */
+    function release(n, type, axes) {
       const bn = ++aux;
       D.addNode(bn, coords[n]);
       coords[bn] = coords[n];
       allNodes.push(bn);
-      const bend = dim === 2 ? 2 : (bdir === 1 ? 4 : 3);
       const src = D.nodes.get(n).map;
-      D.nodes.get(bn).map = src.map((terms, d) => (d === bend ? D.newVar(bn, d) : terms));
-      const t = ++eleTag;
-      if (springMat) {
-        const e = D.addElement(new EL.ZeroLengthRot(ndf, bend, springMat), n, bn);
-        e.tag = t;
+      if (dim === 2) {
+        D.nodes.get(bn).map = src.map((terms, d) => (d === 2 ? D.newVar(bn, 2) : terms));
+        return bn;
       }
-      springs.push([t, n, bn]);
+      const map = src.slice();
+      for (const ax of (type === 2 ? [axes[2], axes[1]] : [axes[2]])) {
+        let big = 0;
+        for (let k = 1; k < 3; k++) if (Math.abs(ax[k]) > Math.abs(ax[big])) big = k;
+        const [[v]] = D.newVar(bn, 3 + big);
+        for (let k = 0; k < 3; k++) if (Math.abs(ax[k]) > 1e-12) map[3 + k] = map[3 + k].concat([[v, ax[k]]]);
+      }
+      D.nodes.get(bn).map = map;
       return bn;
     }
 
-    const beams = [];
-    for (let i = 1; i <= ns; i++) {
-      const lines = [];
-      for (let k = 0; k < yg.length; k++)
-        for (let j = 0; j < xs.length - 1; j++) lines.push([1, nodeTag(i, j, k), nodeTag(i, j + 1, k)]);
-      if (dim === 3)
-        for (let j = 0; j < xs.length; j++)
-          for (let k = 0; k < yg.length - 1; k++) lines.push([2, nodeTag(i, j, k), nodeTag(i, j, k + 1)]);
-      const w = i === ns ? p.w_roof : p.w_floor;
-      for (const [bdir, na, nb] of lines) {
-        const t = ++eleTag;
-        const a = beamEnd(na, bdir), b = beamEnd(nb, bdir);
-        const e = D.addElement(makeBeam(transf(a, b, bdir === 1 ? 'bx' : 'by'), -w), a, b);
-        e.tag = t;
-        beams.push([t, a, b, i, bdir]);
+    const frames = [], hinges = [];
+    for (const f of desc.frames) {
+      const d = sub(f.j, f.i), L = Math.hypot(...d), ex = d.map(v => v / L);
+      let vec = null, ey, ez = null;
+      if (dim === 2) ey = [-ex[1], ex[0]];
+      else {                     // local y as close to vertical as possible; vertical members: local y = X
+        vec = Math.abs(ex[2]) > 1 - 1e-9 ? [0, 1, 0] : EL.cross(ex, [0, 0, 1]);
+        ey = EL.unit(EL.cross(vec, ex));
+        ez = EL.cross(ex, ey);
       }
+      const a = f.ri ? release(f.i, f.ri, [ex, ey, ez]) : f.i;
+      const b = f.rj ? release(f.j, f.rj, [ex, ey, ez]) : f.j;
+      const tr = new EL.Transf(dim, coords[a], coords[b], vec, !!p.pdelta && Math.abs(ex[V]) > 1e-9);
+      // gravity w per unit length: transverse part as a member load, axial part as end loads
+      const w = +f.w || 0, wx = -w * ex[V];
+      const e = D.addElement((f.sec === 'beam' ? makeBeam : makeCol)(tr, -w * ey[V]), a, b);
+      e.tag = ++eleTag;
+      if (wx) for (const n of [f.i, f.j]) for (let k = 0; k < dim; k++) if (ex[k]) loads.push([n, k, 0.5 * wx * L * ex[k]]);
+      frames.push([e.tag, a, b, f.sec, f.id]);
+      if (f.ri) hinges.push([a, b, 'pinned']);
+      if (f.rj) hinges.push([b, a, 'pinned']);
+    }
+
+    const shells = [];
+    desc.shells.forEach((s, k) => {
+      const xyz = s.n.map(n => coords[n]);
+      const e = dim === 2 ? EL.quad2D(xyz, s.E * MPA, s.nu, s.t) : EL.shell3D(xyz, s.E * MPA, s.nu, s.t);
+      e.nodes = s.n.slice();
+      e.tag = ++eleTag;
+      D.elements.push(e);
+      if (e.warp > 0.02 * Math.sqrt(shellArea[k])) D.log(`WARNING shell element ${s.id} is warped (out-of-plane offset ${e.warp.toFixed(3)} m); it is projected on its mean plane`);
+      shells.push([e.tag, s.n.slice(), s.id]);
+    });
+
+    const makers = springs.map(spec => MAT.maker(spec, 1.0));
+    const links = [];
+    for (const l of desc.links) {
+      const sp = [];
+      l.dofs.forEach((t, d) => { if (d < ndf && typeof t === 'number') sp.push({ dof: d, make: makers[t] }); });
+      let tag = null;
+      if (sp.length) {
+        const e = D.addElement(new EL.ZeroLength(ndf, sp), l.i, l.j);
+        e.tag = tag = ++eleTag;
+        let drawn = false;
+        for (const f of frames) {
+          if (f[1] === l.j) { hinges.push([l.j, f[2], 'semi']); drawn = true; }
+          else if (f[2] === l.j) { hinges.push([l.j, f[1], 'semi']); drawn = true; }
+        }
+        if (!drawn) hinges.push([l.j, null, 'semi']);
+      }
+      links.push([tag, l.i, l.j, sp.length > 0, l.id]);
     }
 
     D.finalize();
-    const baseSet = new Set(planNodes[0]);
-    D.baseEls = D.elements.filter(e => baseSet.has(e.nodes[0]));
+    if (loads.some(l => l[2])) {
+      D.Pg = new Float64Array(D.neq);
+      for (const [n, d, v] of loads) D.nodalLoad(n, d + 1, v, D.Pg);
+    }
+    // element ends at supports, for the reactions (base shear); loads applied directly on restrained dofs
+    D.reactions = [];
+    D.supportLoads = new Float64Array(ndf);
+    for (const [n, d, v] of loads) if (fixed(n, d)) D.supportLoads[d] += v;
+    for (const e of D.elements)
+      e.nodes.forEach((n, k) => { const s = byId.has(n) ? supOf(n) : null; if (s) D.reactions.push([e, k, s]); });
+    let nDyn = 0;
+    for (let q = 0; q < D.neq; q++) if (D.Mv[D.prof.diag[q]] > 0) nDyn++;
 
+    const baseIds = descIds.filter(id => elev(id) <= base + 1e-6);
+    const baseRep = baseIds.find(id => supOf(id)) || baseIds[0];
+    const nodeMass = {};
+    for (const [id, m] of mass) if (m > 0) nodeMass[id] = m;
+    const gr = desc.grid || {};
     const info = {
-      dim, xs, yg, levels, ns, columns, beams, springs, conn: conn.type, floor_mass: floorMass,
-      node_mass: nodeMass, base_nodes: planNodes[0], plan_nodes: planNodes, floor_nodes: floorNodes,
-      ctrl_node: floorNodes[floorNodes.length - 1], coords, all_nodes: allNodes,
-      max_modes: Math.max(1, nDyn), n_eq: D.neq, domain: D,
+      dim, xs: gr.xs, yg: gr.yg, levels: [base].concat(floors.map(ids => elev(ids[0]))), ns: floors.length,
+      frames, shells, links, hinges,
+      columns: frames.filter(f => f[3] === 'col'), beams: frames.filter(f => f[3] !== 'col'), springs: links.filter(l => l[3]),
+      conn: desc.conn || 'Custom', custom: !desc.grid,
+      floor_mass: floors.map(ids => ids.reduce((s, id) => s + mass.get(id), 0)),
+      total_mass: [...mass.values()].reduce((a, b) => a + b, 0),
+      node_mass: nodeMass, base_nodes: descIds.filter(id => supOf(id)), supports: descIds.filter(id => supOf(id)).map(id => [id, supOf(id)]),
+      plan_nodes: [baseIds].concat(floors), floor_nodes: [baseRep].concat(floorRep),
+      ctrl_node: floorRep[floorRep.length - 1], coords, all_nodes: allNodes,
+      max_modes: nDyn, n_eq: D.neq, domain: D,
     };
     return info;
   }
@@ -843,13 +1091,21 @@
 
   const lateralDirs = info => (info.dim === 2 ? [1] : [1, 2]);
 
+  /** Sum of the support reactions in direction d, with the sign of the applied lateral load. */
   function baseShear(info, d = 1) {
+    const D = info.domain;
     let s = 0;
-    for (const e of info.domain.baseEls) s += e.F()[d - 1];
+    for (const [e, k, sup] of D.reactions) if (sup[d - 1]) s += e.F()[k * D.ndf + d - 1];
+    if (D.supportLoads) s -= D.lamG * D.supportLoads[d - 1];
     return -s;
   }
 
   const floorDisp = (info, d = 1) => info.floor_nodes.map(n => info.domain.nodeDisp(n, d));
+
+  function needFloors(info) {
+    if (!info.ns) throw new Error('The model has no mass above its base level. Add loads or nodal masses ' +
+      '(the floors are the levels above the lowest node that carry mass).');
+  }
 
   function tryStep(D, test, dt) {
     for (const alg of ALGORITHMS) if (D.step(alg, test, dt)) return true;
@@ -928,8 +1184,9 @@
   }
 
   async function runPushover(info, pattern, targetDrift, nSteps, direction = 1, hooks = {}) {
+    needFloors(info);
     const d = direction, D = info.domain, levels = info.levels;
-    const m = info.floor_mass, h = levels.slice(1);
+    const m = info.floor_mass, h = levels.slice(1).map(z => z - levels[0]);
     let w;
     if (pattern === 'Triangular (inverted)') w = m.map((mi, i) => mi * h[i]);
     else if (pattern === 'Uniform') w = m.slice();
@@ -939,10 +1196,10 @@
 
     D.Pl.fill(0);
     for (let i = 1; i <= info.ns; i++) {
-      const nodes = info.plan_nodes[i];
-      for (const n of nodes) D.nodalLoad(n, d, w[i - 1] / nodes.length, D.Pl);
+      const mi = m[i - 1];                    // floor force shared in proportion to the node masses
+      if (mi > 0) for (const n of info.plan_nodes[i]) if (info.node_mass[n]) D.nodalLoad(n, d, w[i - 1] * info.node_mass[n] / mi, D.Pl);
     }
-    const H = levels[levels.length - 1];
+    const H = levels[levels.length - 1] - levels[0];
     const target = targetDrift / 100 * H;
     const dU = target / nSteps;
     const ctrl = info.ctrl_node;
@@ -978,7 +1235,7 @@
       }
     }
     const drifts = floors.map(f => f.slice(1).map((x, i) => (x - f[i]) / (levels[i + 1] - levels[i])));
-    return { roof, V, floors, drifts, H, W: m.reduce((a, b) => a + b, 0) * G, status, final: currentDisps(info) };
+    return { roof, V, floors, drifts, H, W: info.total_mass * G, status, final: currentDisps(info) };
   }
 
   // ========================================================================
@@ -986,6 +1243,7 @@
   // ========================================================================
   async function runTimeHistory(info, accG, dtRec, scale, zeta, dtAn, extraTime = 0, dampModes = [1, 3],
     direction = 1, hooks = {}) {
+    needFloors(info);
     const d = direction, D = info.domain;
     const nmax = info.max_modes;
     const [mi, mj] = dampModes.slice().sort((a, b) => a - b).map(x => Math.max(1, Math.min(x, nmax)));
@@ -1035,11 +1293,11 @@
     const levels = info.levels;
     const drifts = floors.map(f => f.slice(1).map((x, i) => (x - f[i]) / (levels[i + 1] - levels[i])));
     return { t, roof, V, floors, drifts, status, rayleigh: [aM, bK],
-             periods: [2 * Math.PI / wi, 2 * Math.PI / wj], W: info.floor_mass.reduce((a, b) => a + b, 0) * G };
+             periods: [2 * Math.PI / wi, 2 * Math.PI / wj], W: info.total_mass * G };
   }
 
   FA.engine = {
-    G, MPA, Domain, nodeTag, frameGeometry, elasticProps, createModel, buildModel, buildModelAsync, currentDisps, lateralDirs,
+    G, MPA, Domain, nodeTag, frameGeometry, elasticProps, regularLayout, buildDescription, createModel, buildModel, buildModelAsync, currentDisps, lateralDirs,
     baseShear, floorDisp, runModal, runPushover, runTimeHistory, ALGORITHMS,
     sectionProps: SEC.sectionProps, rcBarLayout: SEC.rcBarLayout, rcSteelSummary: SEC.rcSteelSummary,
   };

@@ -550,38 +550,297 @@
     }
   }
 
-  /** Rotational spring on dof `dof` (0-based within a node) between nodes a and b. */
-  class ZeroLengthRot {
-    constructor(ndf, dof, makeMat) {
+  /**
+   * zeroLength element between nodes a and b: one uniaxial material per
+   * spring, acting on the relative displacement of dof `dof` (0-based, global
+   * axes). springs: [{dof, make}] where make() returns a new material.
+   */
+  class ZeroLength {
+    constructor(ndf, springs) {
       this.ndf = ndf;
       this.n = 2 * ndf;
-      this.dof = dof;
-      this.mat = makeMat();
+      this.springs = springs.map(s => ({ dof: s.dof, mat: s.make() }));
       this.noRayleigh = true;          // zeroLength elements carry no Rayleigh damping by default
       this.ug = new Float64Array(this.n);
       this.Cug = new Float64Array(this.n);
     }
     update(ug) {
       this.ug.set(ug);
-      this.mat.setTrial(ug[this.ndf + this.dof] - ug[this.dof]);
+      for (const s of this.springs) s.mat.setTrial(ug[this.ndf + s.dof] - ug[s.dof]);
       return true;
     }
-    kmat(k) {
-      const n = this.n, K = new Float64Array(n * n), i = this.dof, j = this.ndf + this.dof;
-      K[i * n + i] = k; K[j * n + j] = k; K[i * n + j] = -k; K[j * n + i] = -k;
+    kmat(tangent) {
+      const n = this.n, K = new Float64Array(n * n);
+      for (const s of this.springs) {
+        const k = tangent ? s.mat.tan : s.mat.E0, i = s.dof, j = this.ndf + s.dof;
+        K[i * n + i] += k; K[j * n + j] += k; K[i * n + j] -= k; K[j * n + i] -= k;
+      }
       return K;
     }
-    K() { return this.kmat(this.mat.tan); }
-    Kinit() { return this.kmat(this.mat.E0); }
+    K() { return this.kmat(true); }
+    Kinit() { return this.kmat(false); }
     F() {
       const F = new Float64Array(this.n);
-      F[this.dof] = -this.mat.sig;
-      F[this.ndf + this.dof] = this.mat.sig;
+      for (const s of this.springs) {
+        F[s.dof] -= s.mat.sig;
+        F[this.ndf + s.dof] += s.mat.sig;
+      }
       return F;
     }
-    commit() { this.mat.commit(); this.Cug.set(this.ug); }
-    revert() { this.mat.revert(); this.ug.set(this.Cug); }
+    commit() { for (const s of this.springs) s.mat.commit(); this.Cug.set(this.ug); }
+    revert() { for (const s of this.springs) s.mat.revert(); this.ug.set(this.Cug); }
   }
 
-  FA.elements = { beamIntegration, Transf, ElasticBeam, DispBeam, ForceBeam, ZeroLengthRot };
+  /** Rotational spring on dof `dof` (0-based within a node) between nodes a and b. */
+  class ZeroLengthRot extends ZeroLength {
+    constructor(ndf, dof, makeMat) { super(ndf, [{ dof, make: makeMat }]); }
+  }
+
+  // ------------------------------------------------------------------------
+  // Linear elastic area elements (constant stiffness in global axes)
+  // ------------------------------------------------------------------------
+  class LinearElement {
+    constructor(Kg, n) {
+      this.Kg = Kg;
+      this.n = n;
+      this.ug = new Float64Array(n);
+      this.Cug = new Float64Array(n);
+    }
+    update(ug) { this.ug.set(ug); return true; }
+    K() { return this.Kg; }
+    Kinit() { return this.Kg; }
+    F() {
+      const n = this.n, F = new Float64Array(n), K = this.Kg, u = this.ug;
+      for (let r = 0; r < n; r++) {
+        let s = 0;
+        for (let c = 0; c < n; c++) s += K[r * n + c] * u[c];
+        F[r] = s;
+      }
+      return F;
+    }
+    commit() { this.Cug.set(this.ug); }
+    revert() { this.ug.set(this.Cug); }
+  }
+
+  const QXI = [-1, 1, 1, -1], QETA = [-1, -1, 1, 1];
+  const GP = 1 / Math.sqrt(3);
+  const GAUSS4 = [[-GP, -GP], [GP, -GP], [GP, GP], [-GP, GP]];
+
+  /** Bilinear shape functions, derivatives, Jacobian and its inverse at (ξ, η). */
+  function quadShape(xy, xi, eta) {
+    const N = [], Nxi = [], Neta = [];
+    for (let i = 0; i < 4; i++) {
+      N.push(0.25 * (1 + QXI[i] * xi) * (1 + QETA[i] * eta));
+      Nxi.push(0.25 * QXI[i] * (1 + QETA[i] * eta));
+      Neta.push(0.25 * QETA[i] * (1 + QXI[i] * xi));
+    }
+    let j00 = 0, j01 = 0, j10 = 0, j11 = 0;
+    for (let i = 0; i < 4; i++) {
+      j00 += Nxi[i] * xy[i][0]; j01 += Nxi[i] * xy[i][1];
+      j10 += Neta[i] * xy[i][0]; j11 += Neta[i] * xy[i][1];
+    }
+    const det = j00 * j11 - j01 * j10;
+    const inv = [j11 / det, -j01 / det, -j10 / det, j00 / det];
+    const Nx = [], Ny = [];
+    for (let i = 0; i < 4; i++) {
+      Nx.push(inv[0] * Nxi[i] + inv[1] * Neta[i]);
+      Ny.push(inv[2] * Nxi[i] + inv[3] * Neta[i]);
+    }
+    return { N, Nxi, Neta, J: [j00, j01, j10, j11], det, inv, Nx, Ny };
+  }
+
+  function quadArea(xy) {
+    let a = 0;
+    for (let i = 0; i < 4; i++) { const p = xy[i], q = xy[(i + 1) % 4]; a += p[0] * q[1] - q[0] * p[1]; }
+    return 0.5 * a;
+  }
+
+  /** k += Bᵀ D B · w for B (m x n) and D (m x m), all row-major. */
+  function addBtDB(k, B, D, m, n, w) {
+    const DB = new Float64Array(m * n);
+    for (let a = 0; a < m; a++)
+      for (let b = 0; b < m; b++) {
+        const d = D[a * m + b];
+        if (d === 0) continue;
+        for (let c = 0; c < n; c++) DB[a * n + c] += d * B[b * n + c];
+      }
+    for (let a = 0; a < m; a++)
+      for (let r = 0; r < n; r++) {
+        const br = B[a * n + r] * w;
+        if (br === 0) continue;
+        for (let c = 0; c < n; c++) k[r * n + c] += br * DB[a * n + c];
+      }
+  }
+
+  /** Plane-stress constitutive matrix (3 x 3) times thickness t. */
+  function planeStressD(E, nu, t) {
+    const c = E * t / (1 - nu * nu);
+    return Float64Array.from([c, c * nu, 0, c * nu, c, 0, 0, 0, c * (1 - nu) / 2]);
+  }
+
+  /**
+   * Membrane stiffness (8 x 8, order u1 v1 ... u4 v4) of a 4-node quad with
+   * incompatible modes (Wilson-Taylor Q6), statically condensed. xy are
+   * counter-clockwise local coordinates.
+   */
+  function q6Membrane(xy, D) {
+    const c0 = quadShape(xy, 0, 0);
+    const Kcc = new Float64Array(64), Kci = new Float64Array(32), Kii = new Float64Array(16);
+    for (const [xi, eta] of GAUSS4) {
+      const s = quadShape(xy, xi, eta);
+      const Bc = new Float64Array(24);
+      for (let i = 0; i < 4; i++) {
+        Bc[2 * i] = s.Nx[i]; Bc[8 + 2 * i + 1] = s.Ny[i];
+        Bc[16 + 2 * i] = s.Ny[i]; Bc[16 + 2 * i + 1] = s.Nx[i];
+      }
+      // incompatible modes 1 - ξ², 1 - η² with the centre Jacobian (Taylor's correction)
+      const r = c0.det / s.det, dP = [[-2 * xi, 0], [0, -2 * eta]];
+      const Px = dP.map(([a, b]) => (c0.inv[0] * a + c0.inv[1] * b) * r);
+      const Py = dP.map(([a, b]) => (c0.inv[2] * a + c0.inv[3] * b) * r);
+      const Bi = Float64Array.from([Px[0], Px[1], 0, 0, 0, 0, Py[0], Py[1], Py[0], Py[1], Px[0], Px[1]]);
+      const w = s.det;
+      addBtDB(Kcc, Bc, D, 3, 8, w);
+      addBtDB(Kii, Bi, D, 3, 4, w);
+      const DBi = new Float64Array(12);
+      for (let a = 0; a < 3; a++) for (let b = 0; b < 3; b++) for (let c = 0; c < 4; c++) DBi[a * 4 + c] += D[a * 3 + b] * Bi[b * 4 + c];
+      for (let a = 0; a < 3; a++) for (let r2 = 0; r2 < 8; r2++) for (let c = 0; c < 4; c++) Kci[r2 * 4 + c] += Bc[a * 8 + r2] * DBi[a * 4 + c] * w;
+    }
+    const Kinv = inv(Kii, 4);
+    if (!Kinv) throw new Error('Shell element: singular incompatible-mode matrix (distorted element?)');
+    for (let r = 0; r < 8; r++)
+      for (let c = 0; c < 8; c++) {
+        let s = 0;
+        for (let a = 0; a < 4; a++) for (let b = 0; b < 4; b++) s += Kci[r * 4 + a] * Kinv[a * 4 + b] * Kci[c * 4 + b];
+        Kcc[r * 8 + c] -= s;
+      }
+    return Kcc;
+  }
+
+  /**
+   * MITC4 plate bending stiffness (12 x 12, order w θx θy per node) with
+   * the assumed transverse shear strain field of Bathe and Dvorkin.
+   * Rotations are right-handed about the local axes: βx = θy, βy = −θx.
+   */
+  function mitc4Bending(xy, E, nu, t) {
+    const Db = planeStressD(E, nu, 1).map(v => v * t ** 3 / 12);
+    const Ds = 5 / 6 * E / (2 * (1 + nu)) * t;
+    // covariant transverse shear rows γξz, γηz at (ξ, η)
+    const cov = (xi, eta) => {
+      const s = quadShape(xy, xi, eta), [xx, xy_, ex, ey] = s.J;
+      const rx = new Float64Array(12), re = new Float64Array(12);
+      for (let i = 0; i < 4; i++) {
+        rx[3 * i] = s.Nxi[i]; rx[3 * i + 2] = s.N[i] * xx; rx[3 * i + 1] = -s.N[i] * xy_;
+        re[3 * i] = s.Neta[i]; re[3 * i + 2] = s.N[i] * ex; re[3 * i + 1] = -s.N[i] * ey;
+      }
+      return [rx, re];
+    };
+    const A = cov(0, 1)[0], C = cov(0, -1)[0], B = cov(-1, 0)[1], Dd = cov(1, 0)[1];
+    const K = new Float64Array(144);
+    for (const [xi, eta] of GAUSS4) {
+      const s = quadShape(xy, xi, eta);
+      const Bb = new Float64Array(36);
+      for (let i = 0; i < 4; i++) {
+        Bb[3 * i + 2] = s.Nx[i];                          // κx = ∂βx/∂x
+        Bb[12 + 3 * i + 1] = -s.Ny[i];                    // κy = ∂βy/∂y
+        Bb[24 + 3 * i + 2] = s.Ny[i]; Bb[24 + 3 * i + 1] = -s.Nx[i];
+      }
+      addBtDB(K, Bb, Db, 3, 12, s.det);
+      const Bs = new Float64Array(24);
+      for (let c = 0; c < 12; c++) {
+        const gx = 0.5 * (1 + eta) * A[c] + 0.5 * (1 - eta) * C[c];
+        const ge = 0.5 * (1 + xi) * Dd[c] + 0.5 * (1 - xi) * B[c];
+        Bs[c] = s.inv[0] * gx + s.inv[1] * ge;
+        Bs[12 + c] = s.inv[2] * gx + s.inv[3] * ge;
+      }
+      addBtDB(K, Bs, Float64Array.from([Ds, 0, 0, Ds]), 2, 12, s.det);
+    }
+    return K;
+  }
+
+  /** Counter-clockwise reordering of 4 planar points; returns the permutation. */
+  function ccw(xy) {
+    return quadArea(xy) >= 0 ? [0, 1, 2, 3] : [0, 3, 2, 1];
+  }
+
+  /**
+   * 2D plane-stress quad (Q6) for frames in the X-Y plane. Nodes carry
+   * 3 dofs (ux, uy, rz); the rotation is not used by the element.
+   */
+  function quad2D(coords, E, nu, t) {
+    const p = ccw(coords), xy = p.map(i => coords[i]);
+    if (!(quadArea(xy) > 0)) throw new Error('Shell element has zero area');
+    const km = q6Membrane(xy, planeStressD(E, nu, t));
+    const n = 12, K = new Float64Array(n * n);
+    for (let a = 0; a < 8; a++)
+      for (let b = 0; b < 8; b++) {
+        const r = 3 * p[a >> 1] + (a & 1), c = 3 * p[b >> 1] + (b & 1);
+        K[r * n + c] += km[a * 8 + b];
+      }
+    return new LinearElement(K, n);
+  }
+
+  /**
+   * Flat 4-node shell for 3D frames (6 dofs per node): Q6 membrane, MITC4
+   * plate bending and a Hughes-Brezzi drilling stiffness. Mildly warped
+   * elements are projected on their mean plane.
+   */
+  function shell3D(coords, E, nu, t, drill = 1e-3) {
+    const c = [0, 1, 2].map(k => 0.25 * coords.reduce((s, p) => s + p[k], 0));
+    const sub = (a, b) => a.map((v, i) => v - b[i]);
+    let nrm = cross(sub(coords[2], coords[0]), sub(coords[3], coords[1]));
+    if (!(Math.hypot(...nrm) > 0)) throw new Error('Shell element has zero area');
+    nrm = unit(nrm);
+    const mid = (i, j) => coords[i].map((v, k) => 0.5 * (v + coords[j][k]));
+    let e1 = sub(mid(1, 2), mid(0, 3));
+    const dn = e1.reduce((s, v, k) => s + v * nrm[k], 0);
+    e1 = unit(e1.map((v, k) => v - dn * nrm[k]));
+    const e2 = cross(nrm, e1);
+    const R = [e1, e2, nrm];
+    const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    const xy = coords.map(p => { const d = sub(p, c); return [dot(d, e1), dot(d, e2)]; });
+    const warp = Math.max(...coords.map(p => Math.abs(dot(sub(p, c), nrm))));
+    const A = quadArea(xy);
+    if (!(A > 0)) throw new Error('Shell element has zero area');
+    const km = q6Membrane(xy, planeStressD(E, nu, t));
+    const kb = mitc4Bending(xy, E, nu, t);
+    const Kl = new Float64Array(576);
+    const add = (r, cc, v) => { Kl[r * 24 + cc] += v; };
+    for (let a = 0; a < 8; a++) for (let b = 0; b < 8; b++) add(6 * (a >> 1) + (a & 1), 6 * (b >> 1) + (b & 1), km[a * 8 + b]);
+    for (let a = 0; a < 12; a++) for (let b = 0; b < 12; b++) add(6 * Math.floor(a / 3) + 2 + a % 3, 6 * Math.floor(b / 3) + 2 + b % 3, kb[a * 12 + b]);
+    // drilling: γ (θz − ω)², ω = ½(∂v/∂x − ∂u/∂y), 2 x 2 Gauss points
+    const gam = drill * E / (2 * (1 + nu)) * t;
+    for (const [xi, eta] of GAUSS4) {
+      const s = quadShape(xy, xi, eta), row = new Float64Array(24);
+      for (let i = 0; i < 4; i++) { row[6 * i] = 0.5 * s.Ny[i]; row[6 * i + 1] = -0.5 * s.Nx[i]; row[6 * i + 5] = s.N[i]; }
+      for (let a = 0; a < 24; a++) {
+        if (row[a] === 0) continue;
+        for (let b = 0; b < 24; b++) Kl[a * 24 + b] += gam * s.det * row[a] * row[b];
+      }
+    }
+    // global: K = Tᵀ Kl T, T = blockdiag(R) for the 8 vector triplets
+    const K = new Float64Array(576);
+    const tmp = new Float64Array(576);
+    for (let r = 0; r < 24; r++)
+      for (let g = 0; g < 24; g++) {
+        const bg = g - g % 3, kk = g % 3;
+        let s = 0;
+        for (let l = 0; l < 3; l++) s += Kl[r * 24 + bg + l] * R[l][kk];
+        tmp[r * 24 + g] = s;
+      }
+    for (let g = 0; g < 24; g++) {
+      const bg = g - g % 3, kk = g % 3;
+      for (let h = 0; h < 24; h++) {
+        let s = 0;
+        for (let l = 0; l < 3; l++) s += R[l][kk] * tmp[(bg + l) * 24 + h];
+        K[g * 24 + h] = s;
+      }
+    }
+    const e = new LinearElement(K, 24);
+    e.warp = warp;
+    e.area = A;
+    return e;
+  }
+
+  FA.elements = { beamIntegration, Transf, ElasticBeam, DispBeam, ForceBeam, ZeroLength, ZeroLengthRot,
+                  LinearElement, quad2D, shell3D, quadArea, cross, unit };
 })(globalThis.FA = globalThis.FA || {});

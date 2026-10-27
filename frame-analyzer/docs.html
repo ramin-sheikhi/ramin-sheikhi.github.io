@@ -74,6 +74,7 @@
   <a href="#interface">3. Using the interface</a>
   <a class="sub" href="#sidebar">Model sidebar</a>
   <a class="sub" href="#tab-model">Model tab</a>
+  <a class="sub" href="#editor">Custom-model editor</a>
   <a class="sub" href="#tab-modal">Modal tab</a>
   <a class="sub" href="#tab-pushover">Pushover tab</a>
   <a class="sub" href="#tab-th">Time-history tab</a>
@@ -87,6 +88,7 @@
   <a class="sub" href="#materials">Materials</a>
   <a class="sub" href="#connections">Beam–column connections</a>
   <a class="sub" href="#loads">Loads and masses</a>
+  <a class="sub" href="#custom">Custom models</a>
   <a href="#analyses">6. Analyses</a>
   <a class="sub" href="#gravity">Gravity</a>
   <a class="sub" href="#modal">Modal</a>
@@ -113,7 +115,7 @@ the same inputs, the same model and the same outputs, but needs no Python, no in
 <h2 id="overview">1. Overview</h2>
 <p>The app has two parts:</p>
 <ul>
-  <li>A <strong>user interface</strong> (<code>index.html</code>, <code>css/style.css</code>, <code>js/app.js</code>, <code>js/plots.js</code>).
+  <li>A <strong>user interface</strong> (<code>index.html</code>, <code>css/style.css</code>, <code>js/app.js</code>, <code>js/plots.js</code>, <code>js/editor.js</code>).
     You define the frame, run analyses and view and download the results.</li>
   <li>A <strong>finite element engine</strong> written in JavaScript (<code>js/engine.js</code> and the modules it uses).
     It re-implements the parts of OpenSees the frame model needs: force-based, displacement-based and elastic
@@ -127,7 +129,11 @@ precision.</p>
 
 <h3>Features</h3>
 <ul>
-  <li>2D frames (X–Y plane) and 3D frames (X–Y plan, Z vertical), 1–30 stories, 1–20 bays in each direction.</li>
+  <li>2D frames (X–Y plane) and 3D frames (X–Y plan, Z vertical), 1–30 stories, 1–20 bays in each direction, with equal or
+      individually set bay widths and story heights.</li>
+  <li><strong>Custom models</strong>: a graphical editor to move, add and delete nodes and elements, change supports (fixed,
+      pinned, roller or any dof), release member ends, add braces, cantilevers and setbacks, mesh <strong>shell</strong> walls and
+      slabs and insert <strong>zero-length</strong> springs.</li>
   <li>Element types: <code>forceBeamColumn</code>, <code>dispBeamColumn</code>, <code>elasticBeamColumn</code>; Lobatto, Legendre, Radau and Newton-Cotes integration with 2–10 points.</li>
   <li>Sections: RC rectangle (fiber, confined core + cover + bars), steel I-section (fiber), elastic rectangle.</li>
   <li>13 uniaxial materials, plus a <em>Custom</em> entry that takes OpenSees-style arguments.</li>
@@ -168,8 +174,11 @@ model. <em>Reset</em> restores the defaults.</div>
 other model type. The sidebar has six sections:</p>
 <table>
   <tr><th>Section</th><th>Inputs</th></tr>
-  <tr><td>1 · Geometry</td><td>Stories; bays and bay width (in X, plus Y for 3D); first-story and typical story height;
-    <em>Rigid floor diaphragm</em> (equalDOF in 2D, rigidDiaphragm in 3D); <em>P-Delta for columns</em>.</td></tr>
+  <tr><td>1 · Geometry</td><td><em>Layout</em>: <em>Regular grid</em> or <em>Custom model</em> (see
+    <a href="#editor">custom-model editor</a>). Regular grid: stories; bays and bay width (in X, plus Y for 3D); first-story
+    and typical story height. Tick <em>Unequal bay widths / story heights</em> to enter every bay width (left to right) and
+    every story height (bottom to top) separately. Both layouts: <em>Rigid floor diaphragm</em> (equalDOF in 2D,
+    rigidDiaphragm in 3D); <em>P-Delta</em>.</td></tr>
   <tr><td>2 · Element</td><td>Element type; integration rule and number of integration points (not used by the elastic element).</td></tr>
   <tr><td>3 · Column section<br>4 · Beam section</td><td>Section type and dimensions (mm). For RC: cover to the bar centre, bar
     diameter, bars at top / bottom / per side, concrete material, core confinement factor K and core ultimate strain εcu
@@ -180,7 +189,11 @@ other model type. The sidebar has six sections:</p>
     (moments in kN·m, rotations in rad). Give its initial stiffness either as <em>k</em> (kN·m/rad) or as the fixity factor
     γ = 1 / (1 + 3EI/(kL)). The caption shows k, γ and kL/EI.</td></tr>
   <tr><td>6 · Loads &amp; mass</td><td>Uniform load on floor beams and on roof beams (kN/m, applied to every beam). Seismic mass
-    is either <em>from gravity loads</em> (w × total beam length per floor / g) or entered manually (t per floor).</td></tr>
+    is either <em>from gravity loads</em> (w × total beam length per floor / g) or entered manually (t per floor). For a custom
+    model: the load given to new beams, and the seismic mass <em>from gravity loads / g + nodal masses</em> or <em>nodal masses
+    only</em>.</td></tr>
+  <tr><td>7 · Zero-length materials</td><td>Custom models only: the named spring materials (K1, K2, …) used by zero-length
+    elements. Any material of the <em>spring</em> family; force in kN or moment in kN·m, deformation in m or rad.</td></tr>
 </table>
 <p>Material forms show each material's parameters with units. Stresses and moduli are in MPa for sections and in
 kN·m (or kN·m/rad) for joint springs; strains and rotations are dimensionless or in rad. HystereticSM has an envelope
@@ -196,6 +209,37 @@ dark grey, cover light grey, bars orange. Pinned joints appear as hollow circles
 as filled circles. In 3D, drag the drawing to rotate it and double-click to reset the view.</p>
 <p>If the model cannot be built, or gravity does not converge, the tab shows the error, a likely cause, the engine
 messages and the stack trace (see <a href="#errors">section 8</a>).</p>
+
+<h3 id="editor">Custom-model editor</h3>
+<p>Choose <em>Layout → Custom model</em> in <em>1 · Geometry</em>. The custom model starts as a copy of the regular grid
+(with its supports, loads, masses and connections: pinned joints become end releases, semi-rigid joints zero-length springs)
+and is then edited freely in the <strong>Model</strong> tab. Each model type (2D, 3D) keeps its own custom model;
+<em>Re-create from regular grid</em> starts again. The custom model is saved in the model file and in the browser.</p>
+<table>
+  <tr><th>Tool</th><th>Use</th></tr>
+  <tr><td>Select / move</td><td>Click a node or element to select it, Shift-click to add to the selection. In 2D, drag a node to move it
+    (it snaps to the grid set by <em>Snap</em>). In 3D, drag empty space to rotate the view. The bar above the drawing then offers
+    supports (<em>Fixed</em>, <em>Pinned</em>, <em>Roller</em>, <em>Free</em>) for the selected nodes, section, end releases and
+    <em>Split ÷2</em> for frame elements, and <em>Delete</em>.</td></tr>
+  <tr><td>+ Node (2D)</td><td>Click a grid point. In 3D add nodes with the <em>Node at x y z</em> fields or the <em>+ Add node</em> button.</td></tr>
+  <tr><td>+ Frame</td><td>Click two nodes (in 2D also empty grid points, which become nodes). Keep clicking to draw a chain; click the
+    same node again, right-click or press Esc to stop. Vertical members get the column section, others the beam section; horizontal
+    members get the load of new beams.</td></tr>
+  <tr><td>+ Shell</td><td>Click the four corners of a panel in order around it. The panel is meshed into <em>nx × ny</em> shells
+    (<em>Mesh</em> field) and frame elements along its edges are split at the new nodes, so walls and slabs stay connected to their
+    boundary members.</td></tr>
+  <tr><td>+ Zero-length</td><td>Click a frame element near one of its ends: a new node is created there, the element end is moved to it and a
+    zero-length element joins the two nodes (rigid except the bending rotation, which gets spring K1). Or click two nodes. Or click a
+    supported node twice: the support moves to a new node below it, joined by a zero-length element (a foundation spring).</td></tr>
+  <tr><td>Delete</td><td>Click a node or element. Deleting a node deletes its elements.</td></tr>
+</table>
+<p>Below the drawing, tables list the <strong>nodes</strong> (coordinates, support, added mass, downward load P), the <strong>frame
+elements</strong> (nodes, section, gravity load w, end releases, length, split), the <strong>shells</strong> (nodes, thickness, E, ν,
+density ρ, area load q) and the <strong>zero-length elements</strong> (nodes and, per dof, Free, Rigid or a spring material). Every
+value can be edited; click an element number to select it in the drawing. For models with more than 160 objects the tables show
+the selected objects only (<em>Show all rows</em> lists everything). Keys: Esc cancels the current tool action, Delete removes the
+selection, Ctrl+Z undoes (also the <em>Undo</em> button). Custom supports are typed as 0/1 strings in dof order (2D:
+Ux Uy Rz; 3D: Ux Uy Uz Rx Ry Rz).</p>
 
 <h3 id="tab-modal">Modal tab</h3>
 <p>Enter the number of modes (up to the number of dynamic degrees of freedom; the help icon shows the maximum) and run.
@@ -355,6 +399,44 @@ penalty error. As in OpenSees, joint springs are left out of the Rayleigh dampin
 <p>Every beam carries a uniform load in its local −y direction (downwards): w_floor on floors, w_roof on the roof. Each floor's mass is
 split equally between its grid nodes and assigned to all translational dofs. With <em>From gravity loads</em> the mass per floor is
 w × L / g, where L is the total beam length of a floor (n_bays·bay in 2D; n_x·bay_x·(n_y+1) + n_y·bay_y·(n_x+1) in 3D).</p>
+
+<h3 id="custom">Custom models</h3>
+<p>The regular grid and the custom models are built by the same code: the regular frame is turned into a list of nodes and
+elements first. In a custom model:</p>
+<ul>
+  <li><strong>Supports</strong> restrain any combination of dofs. Fixed = all, pinned = translations, roller = vertical translation only.
+    Dofs that no element stiffens (e.g. the rotation of a node attached only to 2D shells, or to member ends that are all released)
+    are restrained automatically, and a note is written to the engine messages.</li>
+  <li><strong>Frame elements</strong> use the Column or the Beam section. Local axes: vertical members as columns in the table above;
+    any other member has its local y axis in the vertical plane through the member (vecxz = x × Z), so the section depth h bends
+    in that plane, as for the regular beams. P-Delta applies to every non-horizontal member.</li>
+  <li><strong>End releases</strong> work like the pinned joints: an auxiliary node shares every unknown of the end node except the
+    released rotation. <em>Pinned</em> (2D) or <em>Pin major</em> (3D) releases the bending moment about the local z axis; <em>Pin
+    both</em> also releases the moment about local y. Torsion stays connected.</li>
+  <li><strong>Gravity load w</strong> on a frame element is a vertical load per metre of member. The component perpendicular to the
+    member is applied as a member load (with fixed-end moments); the component along it goes to the two end nodes.</li>
+  <li><strong>Shells</strong> are linear elastic 4-node elements. In 2D: plane-stress quads with incompatible modes (Wilson–Taylor Q6),
+    for walls and infills in the plane of the frame. In 3D: flat shells made of the Q6 membrane, MITC4 plate bending (Bathe–Dvorkin
+    assumed transverse shear) and a small Hughes–Brezzi drilling stiffness. Mildly warped elements are projected on their mean plane.
+    Tests: a cantilever wall (4 × 12 mesh) is within 1% of Timoshenko beam theory, a simply supported plate under a point load within
+    2% of the Kirchhoff solution. The drilling stiffness is nominal, so a frame member framing into a wall at a single node is
+    effectively pinned in the wall plane; model boundary columns or embed the beam along the wall edge for moment connections.</li>
+  <li><strong>Zero-length elements</strong> connect node i to node j. For each dof they are <em>Free</em> (not connected), <em>Rigid</em>
+    (node j's dof is tied to node i's, exactly, like equalDOF) or a uniaxial spring acting on the relative displacement or rotation in
+    global axes. Like the joint springs, they are left out of the Rayleigh damping matrix.</li>
+  <li><strong>Loads and masses</strong>: gravity comes from frame w, shell self-weight ρ·g·t and area load q (a quarter of each shell's
+    total to each corner node) and nodal loads P. With <em>Gravity loads / g + nodal</em> each node gets the mass of the loads it
+    receives (tributary, half of a member's load to each end), plus its added mass; with <em>Nodal masses only</em> just the added
+    masses. Masses act in all translational dofs.</li>
+  <li><strong>Floors</strong> are the levels above the lowest node that carry mass and hold a horizontal member or slab (if no level has
+    one, every level with mass). They are used for the rigid diaphragms (which tie the free nodes of each floor), the drift profiles,
+    the pushover load pattern (each floor force shared between its nodes in proportion to their masses) and the roof control node.
+    The base shear is the sum of the support reactions.</li>
+</ul>
+<p>Compared with the regular grid with gravity-load masses, the custom model distributes each floor's mass by tributary length
+instead of equally between the nodes. The floor masses are the same, so 2D periods agree closely, but in 3D the corner nodes get
+less mass and the torsional periods are shorter. With manual masses, a custom model copied from the grid reproduces the grid's
+results exactly.</p>
 
 <!-- ================================================================== -->
 <h2 id="analyses">6. Analyses</h2>
@@ -517,14 +599,17 @@ version (30 stories, 20 × 20 bays), but the largest 3D fiber models are better 
     ├── linalg.js     skyline LDLᵀ solver, RCM ordering, dense symmetric eigen solver, small dense helpers
     ├── materials.js  uniaxial material models + material catalogue (port of materials.py)
     ├── sections.js   section properties, RC bar layout, elastic and fiber sections
-    ├── elements.js   integration rules, Linear/PDelta transformations, elastic/disp/force beam-columns, zero-length spring
-    ├── engine.js     domain (dofs, constraints, assembly, integrators, solvers, eigen), model builder, analyses (port of engine.py)
+    ├── elements.js   integration rules, Linear/PDelta transformations, elastic/disp/force beam-columns, zero-length,
+    │                 2D quad (Q6) and 3D shell (Q6 + MITC4) elements
+    ├── engine.js     domain (dofs, constraints, assembly, integrators, solvers, eigen), regular-grid generator, model
+    │                 builder for any node/element description, analyses (port of engine.py)
     ├── records.js    ground-motion file parsing, sine and synthetic records
     ├── plots.js      SVG line charts, 2D/3D frame drawings, cross-section drawings
+    ├── editor.js     custom-model editor (drawing tools and tables)
     └── app.js        user interface (port of app.py)</code></pre>
 <p>Each script is a plain browser script (no build step, no modules, so it works from <code>file://</code>) that attaches its API to the global
 <code>FA</code> object: <code>FA.linalg</code>, <code>FA.materials</code>, <code>FA.sections</code>, <code>FA.elements</code>, <code>FA.engine</code>,
-<code>FA.records</code>, <code>FA.plots</code>, <code>FA.app</code>. Scripts must load in the order shown in <code>index.html</code>.</p>
+<code>FA.records</code>, <code>FA.plots</code>, <code>FA.editor</code>, <code>FA.app</code>. Scripts must load in the order shown in <code>index.html</code>.</p>
 <h3>Mapping from the Python files</h3>
 <table>
   <tr><th>Python</th><th>JavaScript</th></tr>

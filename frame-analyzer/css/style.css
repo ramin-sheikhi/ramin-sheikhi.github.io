@@ -225,6 +225,9 @@ table.data tr:last-child td { border-bottom: none; }
 .plot .hinge { stroke: var(--ink2); stroke-width: 1; }
 .plot .hinge.pinned { fill: var(--panel); }
 .plot .hinge.semi { fill: var(--c4); }
+.plot .support.open { fill: var(--panel); stroke: var(--ink2); stroke-width: 1.2; }
+.plot .shell { fill: color-mix(in srgb, var(--c3) 22%, transparent); stroke: var(--c3); stroke-width: 0.8; }
+.plot polygon.ghost { fill: none; }
 .section-view { text-align: center; }
 .section-caption { font-size: 0.84rem; color: var(--ink2); line-height: 1.4; }
 .section-caption strong { color: var(--ink); font-size: 0.92rem; }
@@ -236,6 +239,58 @@ table.data tr:last-child td { border-bottom: none; }
 .section-svg .dim { stroke: var(--muted); }
 .section-svg .dim-text { fill: var(--ink2); }
 .modes-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+
+/* ---------- custom-model editor ---------- */
+.list-grid { display: grid; gap: 0 8px; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); }
+.list-grid .field { margin: 4px 0; }
+.spring-box { border: 1px solid var(--line); border-radius: var(--radius); padding: 4px 10px 8px; margin: 8px 0; }
+.spring-head { display: flex; gap: 8px; align-items: center; margin: 6px 0 0; }
+.spring-head label { font-size: 0.83rem; color: var(--ink2); }
+.spring-head input { flex: 1; }
+.mono { font-family: var(--mono); }
+.ed-toolbar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 8px; }
+.ed-tools { flex: 0 1 auto; flex-wrap: wrap; min-width: 0; max-width: 100%; }
+.ed-tools button { flex: 0 0 auto; }
+#model-editor, #model-info { min-width: 0; max-width: 100%; }
+.ed-opts { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; font-size: 0.86rem; color: var(--ink2); }
+.ed-opts label { display: inline-flex; align-items: center; gap: 4px; }
+.ed-opts .check.inline { margin: 0; }
+input.short { width: 68px; padding: 3px 6px; }
+.ed-add { display: inline-flex; align-items: center; gap: 4px; }
+.ed-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 6px 10px; font-size: 0.86rem; }
+.ed-bar strong { margin-right: 6px; }
+.ed-sep { color: var(--muted); margin-left: 8px; }
+.ed-hint { min-height: 1.3em; margin: 6px 0; }
+.ed-canvas { padding: 0; overflow: hidden; touch-action: none; user-select: none; }
+.editor-svg { cursor: crosshair; }
+.ed-grid line { stroke: var(--grid); stroke-width: 1; }
+.ed-grid line.ed-axis { stroke: var(--line); stroke-width: 1.5; }
+.ed-frame { stroke-linecap: round; stroke-width: 2.6; }
+.ed-frame.col { stroke: var(--c1); }
+.ed-frame.beam { stroke: var(--c3); }
+.ed-frame.sel { stroke: var(--c2); stroke-width: 4.5; }
+.ed-shell { fill: color-mix(in srgb, var(--c3) 16%, transparent); stroke: color-mix(in srgb, var(--c3) 60%, transparent); stroke-width: 1; }
+.ed-shell.sel { fill: color-mix(in srgb, var(--c2) 30%, transparent); stroke: var(--c2); }
+.ed-node { fill: var(--ink); stroke: var(--panel); stroke-width: 1; }
+.ed-node.sel { fill: var(--c2); }
+.ed-node.pend { fill: var(--c4); stroke: var(--ink); }
+.ed-sup { fill: none; stroke: var(--ink2); stroke-width: 1.4; }
+.ed-sup-line { stroke: var(--ink2); stroke-width: 1.4; }
+.ed-link { fill: var(--c4); stroke: var(--ink); stroke-width: 0.8; }
+.ed-link.sel { fill: var(--c2); }
+.ed-link-line { stroke: var(--c4); stroke-width: 1.2; }
+.plot .ed-label { font-size: 10px; fill: var(--muted); pointer-events: none; }
+.plot .ed-label.el { fill: var(--ink2); font-style: italic; }
+.ed-tables { margin-top: 10px; }
+table.ed-table td { padding: 2px 6px; text-align: left; }
+table.ed-table input, table.ed-table select { padding: 3px 6px; min-width: 64px; font-size: 0.86rem; }
+table.ed-table input.id-in { width: 74px; }
+table.ed-table input.nodes-in { width: 130px; }
+table.ed-table td.id { cursor: pointer; color: var(--accent); font-weight: 600; }
+table.ed-table tr.sel td { background: color-mix(in srgb, var(--c2) 14%, transparent); }
+table.ed-table .del { border: none; background: none; color: var(--muted); cursor: pointer; font-size: 1rem; }
+table.ed-table select + input { margin-top: 3px; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 1100px) {

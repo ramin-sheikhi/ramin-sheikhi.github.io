@@ -278,31 +278,42 @@
     const lw = d3 ? 1.6 : 2.4;
     const members = (P, cls, style) => {
       let d = '';
-      for (const c of info.columns) { const a = S(P[c[1]]), b = S(P[c[2]]); d += `M${a[0].toFixed(1)} ${a[1].toFixed(1)}L${b[0].toFixed(1)} ${b[1].toFixed(1)}`; }
-      for (const bm of info.beams) { const a = S(P[bm[1]]), b = S(P[bm[2]]); d += `M${a[0].toFixed(1)} ${a[1].toFixed(1)}L${b[0].toFixed(1)} ${b[1].toFixed(1)}`; }
+      for (const c of info.frames || info.columns.concat(info.beams)) {
+        const a = S(P[c[1]]), b = S(P[c[2]]);
+        d += `M${a[0].toFixed(1)} ${a[1].toFixed(1)}L${b[0].toFixed(1)} ${b[1].toFixed(1)}`;
+      }
       svgEl('path', { d, class: cls, style }, svg);
     };
+    const shells = (P, cls) => {
+      for (const s of info.shells || []) svgEl('polygon', { points: s[1].map(n => S(P[n]).map(v => v.toFixed(1)).join(',')).join(' '), class: cls }, svg);
+    };
     if (o.coords) {
+      shells(base, 'ghost');
+      shells(o.coords, 'shell');
       members(base, 'ghost', '');
       members(o.coords, 'member', `stroke:${o.color || 'var(--c1)'};stroke-width:${lw}`);
-    } else members(base, 'member', `stroke:${o.color || 'var(--c1)'};stroke-width:${lw}`);
-
-    if (info.conn && info.conn !== 'Rigid') {
-      const off = 0.04 * (info.xs[1] || 1);
-      const cls = info.conn === 'Pinned' ? 'hinge pinned' : 'hinge semi';
-      for (const bm of info.beams) {
-        const pa = pos[bm[1]], pb = pos[bm[2]];
-        const L = Math.hypot(...pb.map((v, i) => v - pa[i])) || 1;
-        const u = pb.map((v, i) => (v - pa[i]) / L * off);
-        for (const p of [pa.map((v, i) => v + u[i]), pb.map((v, i) => v - u[i])]) {
-          const s = S(p);
-          svgEl('circle', { cx: s[0], cy: s[1], r: d3 ? 2.8 : 3.6, class: cls }, svg);
-        }
-      }
+    } else {
+      shells(base, 'shell');
+      members(base, 'member', `stroke:${o.color || 'var(--c1)'};stroke-width:${lw}`);
     }
-    for (const n of info.base_nodes) {
+
+    // hinges: released member ends (open) and joint springs (filled), drawn a little inside the member
+    for (const [n, other, kind] of info.hinges || []) {
+      const pa = pos[n];
+      let p = pa;
+      if (other !== null && pos[other]) {
+        const pb = pos[other], L = Math.hypot(...pb.map((v, i) => v - pa[i])) || 1, off = Math.min(0.04 * L, 0.35);
+        p = pa.map((v, i) => v + (pb[i] - v) / L * off);
+      }
+      const s = S(p);
+      svgEl('circle', { cx: s[0], cy: s[1], r: d3 ? 2.8 : 3.6, class: kind === 'pinned' ? 'hinge pinned' : 'hinge semi' }, svg);
+    }
+    for (const [n, sup] of info.supports || info.base_nodes.map(x => [x, null])) {
       const s = S(base[n]), r = d3 ? 3 : 5;
-      svgEl('rect', { x: s[0] - r, y: s[1] - r, width: 2 * r, height: 2 * r, class: 'support' }, svg);
+      const rot = sup && sup.slice(info.dim).some(Boolean), trans = !sup || sup.slice(0, info.dim).every(Boolean);
+      if (!sup || (rot && trans)) svgEl('rect', { x: s[0] - r, y: s[1] - r, width: 2 * r, height: 2 * r, class: 'support' }, svg);
+      else svgEl('polygon', { points: `${s[0]},${s[1]} ${s[0] - r - 1},${s[1] + 1.8 * r} ${s[0] + r + 1},${s[1] + 1.8 * r}`,
+        class: trans ? 'support' : 'support open' }, svg);
     }
     if (d3) text(svg, W - 8, H - 8, 'drag to rotate · double-click to reset', { class: 'tick hint', 'text-anchor': 'end' });
   }
